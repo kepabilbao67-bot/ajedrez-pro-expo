@@ -5,7 +5,7 @@ import { AiCancelledError } from '@/ai/errors';
 import { getOpeningMove } from '@/ai/opening-book';
 import { StockfishEngine } from '@/ai/stockfish-engine';
 import type { DifficultyLevel, PlayStyle } from '@/ai/types';
-import type { ChessGame, MoveRecord } from '@/chess';
+import type { ChessGame, MoveInput, MoveRecord, PromotionPiece } from '@/chess';
 import { canAccessDifficulty } from '@/premium/premium-policy';
 import type { PremiumStatus } from '@/premium/premium-types';
 
@@ -84,7 +84,12 @@ export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResul
           // Add a small artificial delay so it feels natural
           await new Promise(resolve => setTimeout(resolve, 600));
           if (controller.signal.aborted) throw new AiCancelledError();
-          record = targetGame.move(openingMove);
+          const moveInput: MoveInput = {
+            from: openingMove.slice(0, 2),
+            to: openingMove.slice(2, 4),
+            promotion: openingMove.length > 4 ? (openingMove[4] as PromotionPiece) : undefined,
+          };
+          record = targetGame.move(moveInput);
         } else {
           const engine = getEngine();
           record = await playAiTurn({

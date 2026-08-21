@@ -13,7 +13,7 @@ export function usePuzzleRush({ onGameOver }: UsePuzzleRushOptions) {
   const [strikes, setStrikes] = useState(0);
   const maxStrikes = 3;
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startRush = useCallback(() => {
     setIsActive(true);
