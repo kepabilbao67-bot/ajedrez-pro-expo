@@ -1,4 +1,4 @@
-export type BoardThemeId = 'classic' | 'neon-cyber' | 'glass' | 'medieval' | 'royal-gold' | 'futuristic';
+export type BoardThemeId = 'classic' | 'neon-cyber' | 'glass' | 'medieval' | 'royal-gold' | 'futuristic' | 'ocean' | 'cherry-blossom';
 
 export interface BoardThemeDefinition {
   readonly id: BoardThemeId;
@@ -21,6 +21,8 @@ export const BOARD_THEMES: readonly BoardThemeDefinition[] = [
   { id: 'medieval', name: 'Medieval', availability: 'prepared', lightSquare: '#E6D2A6', darkSquare: '#6E4731', frame: '#A76A37', lastMove: '#D6A943', selected: '#E9B75A', legalMove: '#E9B75A', coordinateLight: '#5A3523', coordinateDark: '#F7E8C8' },
   { id: 'royal-gold', name: 'Royal Gold', availability: 'prepared', lightSquare: '#F2E6BF', darkSquare: '#76521D', frame: '#D6A943', lastMove: '#F7CE63', selected: '#FFF1A3', legalMove: '#FFF1A3', coordinateLight: '#5F4013', coordinateDark: '#FFF5D8' },
   { id: 'futuristic', name: 'Futuristic', availability: 'prepared', lightSquare: '#D5D9FF', darkSquare: '#323B85', frame: '#7D8CFF', lastMove: '#43D8FF', selected: '#FFCF4A', legalMove: '#43D8FF', coordinateLight: '#27306B', coordinateDark: '#E9EBFF' },
+  { id: 'ocean', name: 'Ocean', availability: 'prepared', lightSquare: '#E0F7FA', darkSquare: '#006064', frame: '#00838F', lastMove: '#4DD0E1', selected: '#80DEEA', legalMove: '#80DEEA', coordinateLight: '#004D40', coordinateDark: '#B2EBF2' },
+  { id: 'cherry-blossom', name: 'Cherry Blossom', availability: 'prepared', lightSquare: '#FCE4EC', darkSquare: '#AD1457', frame: '#D81B60', lastMove: '#F06292', selected: '#F8BBD0', legalMove: '#F8BBD0', coordinateLight: '#880E4F', coordinateDark: '#F8BBD0' },
 ];
 
 export function boardThemeById(id: BoardThemeId): BoardThemeDefinition {

@@ -4,12 +4,13 @@ interface ChallengeTemplate {
   readonly kind: DailyChallengeKind;
   readonly title: string;
   readonly rewardXp: number;
+  readonly target: number;
 }
 
 const DAILY_TEMPLATES: readonly ChallengeTemplate[] = [
-  { kind: 'game-completed', title: 'Completa una partida', rewardXp: 25 },
-  { kind: 'analysis-completed', title: 'Analiza una partida', rewardXp: 20 },
-  { kind: 'exercise-completed', title: 'Resuelve un ejercicio', rewardXp: 30 },
+  { kind: 'game-completed', title: 'Juega 2 partidas', rewardXp: 50, target: 2 },
+  { kind: 'analysis-completed', title: 'Analiza 2 partidas', rewardXp: 40, target: 2 },
+  { kind: 'exercise-completed', title: 'Resuelve 3 ejercicios', rewardXp: 90, target: 3 },
 ];
 
 export function calendarDate(date = new Date()): string {
@@ -25,7 +26,7 @@ export function createDailyChallenge(date = calendarDate()): DailyChallenge {
     title: template.title,
     rewardXp: template.rewardXp,
     kind: template.kind,
-    target: 1,
+    target: template.target,
     progress: 0,
     completed: false,
   };

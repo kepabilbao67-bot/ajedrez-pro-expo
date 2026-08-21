@@ -1,6 +1,8 @@
-export type DifficultyLevel = 1 | 2 | 3 | 4 | 5 | 6;
+export type DifficultyLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-export type DifficultyName = 'Beginner' | 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master';
+export type DifficultyName = 'Novice' | 'Beginner' | 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master' | 'Grandmaster';
+
+export type PlayStyle = 'Balanced' | 'Aggressive' | 'Defensive' | 'Tactical' | 'Positional';
 
 export type AnalysisState = 'idle' | 'running' | 'completed' | 'cancelled' | 'failed';
 
@@ -40,11 +42,13 @@ export interface AnalysisMetadata {
   readonly completed: boolean;
   readonly selectedCandidateRank: number;
   readonly difficulty: DifficultyLevel;
+  readonly playStyle?: PlayStyle;
 }
 
 export interface AnalysisRequest {
   readonly fen: string;
   readonly difficulty: DifficultyLevel;
+  readonly playStyle?: PlayStyle;
   readonly limits: SearchLimits;
   readonly signal?: AbortSignal;
 }

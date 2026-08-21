@@ -31,6 +31,14 @@ const TACTICAL_SEEDS: readonly PuzzleSeed[] = [
   { category: 'best-move', title: 'Respuesta central', fen: 'rnbqkbnr/pppppppp/8/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 1', solution: { from: 'e7', to: 'e5' }, objective: 'Contestar el centro con desarrollo y espacio.', explanation: 'e5 disputa el centro y abre líneas para las piezas negras.', alternative: 'Una buena jugada de apertura suele desarrollar y luchar por el centro.' },
 ];
 
+const PINS_AND_FORKS: readonly PuzzleSeed[] = [
+  { category: 'basic-tactics', title: 'Ataque Doble de Dama', fen: '4k3/8/8/3r4/8/8/8/4Q1K1 w - - 0 1', solution: { from: 'e1', to: 'e4' }, objective: 'Atacar dos piezas al mismo tiempo.', explanation: 'La dama da jaque al rey y ataca la torre simultáneamente.', alternative: 'Busca siempre alineaciones vulnerables.' },
+  { category: 'win-material', title: 'Clavada de Alfil', fen: '6k1/5r2/8/8/8/8/B7/6K1 w - - 0 1', solution: { from: 'a2', to: 'c4' }, objective: 'Inmovilizar una pieza enemiga de valor.', explanation: 'El alfil clava la torre al rey; la torre no puede moverse.', alternative: 'Aprovecha las diagonales abiertas hacia el rey.' },
+  { category: 'basic-tactics', title: 'Horquilla de Peón', fen: '4k3/8/8/8/3n1n2/4P3/8/4K3 w - - 0 1', solution: { from: 'e3', to: 'e4' }, objective: 'Atacar dos piezas menores con un peón.', explanation: 'El peón avanza amenazando a ambos caballos a la vez.', alternative: 'Los peones son excelentes para atrapar piezas enemigas.' },
+  { category: 'win-material', title: 'Ataque Doble de Torre', fen: '4k3/8/8/2n1b3/8/8/3R4/4K3 w - - 0 1', solution: { from: 'd2', to: 'd5' }, objective: 'Crear una doble amenaza ortogonal.', explanation: 'La torre se sitúa atacando tanto al alfil como al caballo.', alternative: 'Centra tus torres para maximizar sus objetivos.' },
+  { category: 'basic-tactics', title: 'Clavada Frontal de Torre', fen: '4k3/4q3/8/8/8/8/R7/4K3 w - - 0 1', solution: { from: 'a2', to: 'e2' }, objective: 'Atrapar a la dama contra el rey.', explanation: 'La torre se alinea con el rey y la dama, inmovilizándola de forma fatal.', alternative: 'Busca las columnas donde se encuentra el rey rival.' },
+];
+
 function series(seed: PuzzleSeed, count: number, prefix: string): TrainingPuzzle[] {
   return Array.from({ length: count }, (_, index) => ({
     id: `${prefix}-${String(index + 1).padStart(2, '0')}`,
@@ -52,4 +60,5 @@ export const ACADEMY_PUZZLES: readonly TrainingPuzzle[] = [
   ...series(TACTICAL_SEEDS[1], 10, 'material'),
   ...series(TACTICAL_SEEDS[2], 10, 'defensa'),
   ...series(TACTICAL_SEEDS[3], 10, 'mejor-jugada'),
+  ...PINS_AND_FORKS.map((seed, index) => series(seed, 1, `tactics-adv-${index + 1}`)[0]),
 ];

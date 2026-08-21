@@ -1,7 +1,7 @@
 import { difficultyDefinition } from './difficulty';
 import { AiCancelledError, AiEngineError, AiTimeoutError } from './errors';
 import type { AiEngine } from './engine-adapter';
-import type { AiMove, AnalysisRequest, AnalysisResult, CandidateMove, DifficultyLevel, PositionEvaluation } from './types';
+import type { AiMove, AnalysisRequest, AnalysisResult, CandidateMove, DifficultyLevel, PlayStyle, PositionEvaluation } from './types';
 
 const WORKER_PATH = '/stockfish/stockfish-18-lite-single.js';
 const UCI_MOVE = /^([a-h][1-8])([a-h][1-8])([qrbn])?$/;
@@ -168,7 +168,7 @@ export class StockfishEngine implements AiEngine {
         if (candidates.length === 0 && engineBest) {
           candidates.push({ move: engineBest, evaluation: { kind: 'centipawns', value: 0, perspective: 'white' }, principalVariation: [engineBest] });
         }
-        const selectedRank = this.selectRank(request.difficulty, candidates.length);
+        const selectedRank = this.selectRank(candidates, request.difficulty, request.playStyle, blackToMove);
         const selected = candidates[selectedRank] ?? null;
         const strongest = ordered[0];
         cleanup();
@@ -180,7 +180,7 @@ export class StockfishEngine implements AiEngine {
           metadata: {
             engineId: this.id, engineVersion: this.version, depthReached: strongest?.depth,
             elapsedMs: strongest?.time ?? Date.now() - started, nodes: strongest?.nodes,
-            completed: true, selectedCandidateRank: selectedRank + 1, difficulty: request.difficulty,
+            completed: true, selectedCandidateRank: selectedRank + 1, difficulty: request.difficulty, playStyle: request.playStyle,
           },
         });
       };
@@ -190,9 +190,49 @@ export class StockfishEngine implements AiEngine {
     });
   }
 
-  private selectRank(level: DifficultyLevel, count: number): number {
+  private selectRank(candidates: CandidateMove[], level: DifficultyLevel, style?: PlayStyle, blackToMove?: boolean): number {
+    const count = candidates.length;
     if (count <= 1) return 0;
     const profile = difficultyDefinition(level);
+    
+    if (style && style !== 'Balanced') {
+      const window = Math.max(1, Math.min(profile.candidateWindow, count));
+      const viable = candidates.slice(0, window);
+      let bestRank = 0;
+      let bestScore = -Infinity;
+      
+      for (let i = 0; i < viable.length; i++) {
+        const move = viable[i].move;
+        let styleScore = 0;
+        
+        const fromRank = parseInt(move.from[1], 10);
+        const toRank = parseInt(move.to[1], 10);
+        const rankDiff = blackToMove ? fromRank - toRank : toRank - fromRank;
+        
+        if (style === 'Aggressive') {
+          styleScore += rankDiff * 2; // Favors moving forward
+        } else if (style === 'Defensive') {
+          styleScore -= rankDiff * 2; // Favors retreating or staying put
+        } else if (style === 'Tactical') {
+          // Tactical favors shorter PVs (forcing moves) or moves with big eval swings, simple proxy: less rank change, high piece tension
+          styleScore += (Math.abs(fromRank - toRank) > 2) ? 2 : 0; 
+        } else if (style === 'Positional') {
+          // Favors center files (c, d, e, f)
+          const isCenter = (sq: string) => /^[cdef]/.test(sq);
+          if (isCenter(move.to)) styleScore += 3;
+        }
+        
+        // Base score depends on original rank to not blunder terribly
+        const totalScore = styleScore - i * 3; 
+        
+        if (totalScore > bestScore) {
+          bestScore = totalScore;
+          bestRank = i;
+        }
+      }
+      return bestRank;
+    }
+
     if (this.random() < profile.bestMoveProbability) return 0;
     return 1 + Math.floor(this.random() * Math.max(1, Math.min(profile.candidateWindow, count) - 1));
   }

@@ -46,7 +46,13 @@ export class XpService {
       : challenge;
     const reward = progressed.completed && !challenge.completed ? progressed.rewardXp : 0;
     const state = { ...base, xp: base.xp + XP_AWARDS[event] + reward, dailyChallenge: progressed };
-    return this.save(profile, unlockAchievements(state, profile.learning, this.now().toISOString()));
+    const context = {
+      wins: profile.learning.wins,
+      gamesPlayed: profile.learning.gamesPlayed,
+      estimatedLevel: profile.learning.estimatedLevel,
+      exercisesCompleted: profile.progress.exercisesCompleted ?? 0,
+    };
+    return this.save(profile, unlockAchievements(state, context, this.now().toISOString()));
   }
 
   recordGame(result: ProfileGameResult, checkmate: boolean): GamificationState {
@@ -55,7 +61,13 @@ export class XpService {
     if (!checkmate) return state;
     const profile = this.storage.load();
     const next = { ...state, checkmates: state.checkmates + 1 };
-    return this.save(profile, unlockAchievements(next, profile.learning, this.now().toISOString()));
+    const context = {
+      wins: profile.learning.wins,
+      gamesPlayed: profile.learning.gamesPlayed,
+      estimatedLevel: profile.learning.estimatedLevel,
+      exercisesCompleted: profile.progress.exercisesCompleted ?? 0,
+    };
+    return this.save(profile, unlockAchievements(next, context, this.now().toISOString()));
   }
 
   recordAnalysis(): GamificationState { return this.award('analysis-completed'); }

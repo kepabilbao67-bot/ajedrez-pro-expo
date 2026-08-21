@@ -2,8 +2,9 @@ import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 
 
 import { playAiTurn } from '@/ai/ai-opponent';
 import { AiCancelledError } from '@/ai/errors';
+import { getOpeningMove } from '@/ai/opening-book';
 import { StockfishEngine } from '@/ai/stockfish-engine';
-import type { DifficultyLevel } from '@/ai/types';
+import type { DifficultyLevel, PlayStyle } from '@/ai/types';
 import type { ChessGame, MoveRecord } from '@/chess';
 import { canAccessDifficulty } from '@/premium/premium-policy';
 import type { PremiumStatus } from '@/premium/premium-types';
@@ -17,7 +18,9 @@ export interface UseAiOpponentOptions {
 
 export interface UseAiOpponentResult {
   readonly difficulty: DifficultyLevel;
+  readonly playStyle: PlayStyle;
   readonly setDifficulty: (difficulty: DifficultyLevel) => void;
+  readonly setPlayStyle: (style: PlayStyle) => void;
   readonly thinking: boolean;
   readonly aiError: string | null;
   readonly clearAiError: () => void;
@@ -29,6 +32,7 @@ export interface UseAiOpponentResult {
 export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResult {
   const { initialDifficulty = 3, generationRef, onMoveApplied, premiumStatus } = options;
   const [difficulty, setDifficultyState] = useState<DifficultyLevel>(initialDifficulty);
+  const [playStyle, setPlayStyle] = useState<PlayStyle>('Balanced');
   const [thinking, setThinking] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
@@ -72,13 +76,26 @@ export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResul
       setThinking(true);
       setAiError(null);
       try {
-        const engine = getEngine();
-        const record = await playAiTurn({
-          game: targetGame,
-          engine,
-          difficulty,
-          signal: controller.signal,
-        });
+        const fen = targetGame.fen();
+        const openingMove = getOpeningMove(fen);
+        let record: MoveRecord | null = null;
+
+        if (openingMove) {
+          // Add a small artificial delay so it feels natural
+          await new Promise(resolve => setTimeout(resolve, 600));
+          if (controller.signal.aborted) throw new AiCancelledError();
+          record = targetGame.move(openingMove);
+        } else {
+          const engine = getEngine();
+          record = await playAiTurn({
+            game: targetGame,
+            engine,
+            difficulty,
+            playStyle,
+            signal: controller.signal,
+          });
+        }
+
         if (record && generation === generationRef.current) {
           onMoveApplied(record, targetGame);
         }
@@ -91,7 +108,7 @@ export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResul
         if (abortRef.current === controller) abortRef.current = null;
       }
     },
-    [difficulty, generationRef, getEngine, onMoveApplied],
+    [difficulty, playStyle, generationRef, getEngine, onMoveApplied],
   );
 
   useEffect(
@@ -104,7 +121,9 @@ export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResul
 
   return {
     difficulty,
+    playStyle,
     setDifficulty,
+    setPlayStyle,
     thinking,
     aiError,
     clearAiError,

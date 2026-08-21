@@ -3,14 +3,21 @@ import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } fr
 import Animated, { FadeIn, FadeInDown, LinearTransition } from 'react-native-reanimated';
 
 import { DIFFICULTIES, difficultyDefinition } from '@/ai/difficulty';
+import type { PlayStyle } from '@/ai/types';
 import type { PromotionPiece, Square } from '@/chess';
 import { ChessBoard } from '@/components/chess-board';
 import { CoachPanel } from '@/components/coach-panel';
 import { GameOverModal } from '@/components/game-over-modal';
+import { HistoryPanel } from '@/components/history-panel';
+import { OnboardingScreen } from '@/components/onboarding-screen';
 import { PostGamePanel } from '@/components/post-game-panel';
+import { PremiumUpsellModal } from '@/components/premium-upsell';
 import { ProfilePanel } from '@/components/profile-panel';
+import { PuzzleRushPanel } from '@/components/puzzle-rush-panel';
+import { SettingsPanel } from '@/components/settings-panel';
 import { PromotionPicker } from '@/components/promotion-picker';
 import { TrainingPanel } from '@/components/training-panel';
+import { VictoryCelebration } from '@/components/victory-celebration';
 import { BOARD_THEMES } from '@/board-themes/board-themes';
 import { PIECE_SETS } from '@/board-themes/piece-sets';
 import { useAiOpponent } from '@/hooks/use-ai-opponent';
@@ -20,10 +27,16 @@ import { usePlayerProgress } from '@/hooks/use-player-progress';
 import { usePremium } from '@/hooks/use-premium';
 import { useTrainingSession } from '@/hooks/use-training-session';
 import { useVisualPreferences } from '@/hooks/use-visual-preferences';
+import { useHaptics } from '@/hooks/use-haptics';
+import { useAudioSfx } from '@/hooks/use-audio-sfx';
+import { usePuzzleRush } from '@/hooks/use-puzzle-rush';
+import { useChessStats } from '@/hooks/use-chess-stats';
+import { AI_BOTS } from '@/ai/bots';
+import type { AiBot } from '@/ai/bots';
 import { XP_AWARDS } from '@/gamification/xp-types';
 import type { TrainingPuzzle } from '@/training/training-types';
 
-type GameMode = 'local' | 'ai';
+type GameMode = 'local' | 'ai' | 'rush';
 type AppSection = 'home' | 'play';
 
 export default function Index() {
@@ -50,6 +63,8 @@ export default function Index() {
   const {
     difficulty,
     setDifficulty,
+    playStyle,
+    setPlayStyle,
     thinking,
     aiError,
     cancelAi,
@@ -58,10 +73,13 @@ export default function Index() {
   } = useAiOpponent({
     generationRef,
     premiumStatus,
-    onMoveApplied: (record, targetGame) => refresh(record, targetGame),
+    onMoveApplied: (record, targetGame) => {
+      refresh(record, targetGame);
+      playMoveHaptics(record.san);
+    },
   });
-  const [historyExpanded, setHistoryExpanded] = useState(false);
   const [mode, setMode] = useState<GameMode>('local');
+  const [activeBot, setActiveBot] = useState<AiBot>(AI_BOTS[0]);
   const {
     profile,
     gamification,
@@ -106,7 +124,47 @@ export default function Index() {
   });
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [section, setSection] = useState<AppSection>('home');
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(true); // assume true until loaded
+  const [showUpsell, setShowUpsell] = useState(false);
   const completedGameGeneration = useRef<number | null>(null);
+  const { hapticMove, hapticCapture, hapticCheck, hapticVictory } = useHaptics();
+  const { playMove, playCapture, playCheck, playVictory } = useAudioSfx();
+  const { stats: chessStats, updatePuzzleRushScore, recordGame: recordGameStat } = useChessStats();
+
+  useEffect(() => {
+    import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
+      AsyncStorage.getItem('@ajedrezpro_onboarding').then((val) => {
+        if (val !== 'true') setHasSeenOnboarding(false);
+      }).catch(() => {});
+    }).catch(() => {});
+  }, []);
+
+  const completeOnboarding = () => {
+    setHasSeenOnboarding(true);
+    import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
+      AsyncStorage.setItem('@ajedrezpro_onboarding', 'true').catch(() => {});
+    }).catch(() => {});
+  };
+
+  const rush = usePuzzleRush({
+    onGameOver: (finalScore) => {
+      void updatePuzzleRushScore(finalScore);
+    },
+  });
+
+  useEffect(() => {
+    if (coachMessage?.includes('límite')) {
+      setShowUpsell(true);
+      resetCoach();
+    }
+  }, [coachMessage, resetCoach]);
+
+  const playMoveHaptics = (san: string) => {
+    if (san.includes('#')) { hapticVictory(); playVictory(); }
+    else if (san.includes('+')) { hapticCheck(); playCheck(); }
+    else if (san.includes('x')) { hapticCapture(); playCapture(); }
+    else { hapticMove(); playMove(); }
+  };
 
   const availableWidth = width - 30;
   const landscapeLimit = width > height ? height - 110 : 440;
@@ -118,12 +176,20 @@ export default function Index() {
     resetChessGame(puzzleGame);
   };
 
+  const nextRushPuzzle = () => {
+    const randomPuzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
+    startPuzzle(randomPuzzle);
+  };
+
   useEffect(() => {
     if (!status.gameOver || completedGameGeneration.current === generationRef.current) return;
     const result = status.draw || !status.winner ? 'draw' : status.winner === 'w' ? 'win' : 'loss';
     recordCompletedGame(result, status.checkmate, coachReport);
+    if (mode === 'local' || mode === 'ai') {
+      void recordGameStat(status.winner === 'w');
+    }
     completedGameGeneration.current = generationRef.current;
-  }, [coachReport, generationRef, recordCompletedGame, status.checkmate, status.draw, status.gameOver, status.winner]);
+  }, [coachReport, generationRef, recordCompletedGame, status.checkmate, status.draw, status.gameOver, status.winner, mode, recordGameStat]);
 
   const handleSquarePress = (square: Square) => {
     if (selected !== null) {
@@ -136,13 +202,29 @@ export default function Index() {
         const attempt = submitAttempt(selected, square);
         if (attempt?.isCorrect) {
           const certifiedRecord = game.move({ from: selected, to: square });
-          if (certifiedRecord) refresh(certifiedRecord, game);
+          if (certifiedRecord) {
+            refresh(certifiedRecord, game);
+            playMoveHaptics(certifiedRecord.san);
+            if (certifiedRecord.san.includes('#') || game.status().gameOver) {
+              if (mode === 'rush') {
+                rush.recordSuccess();
+                setTimeout(nextRushPuzzle, 800);
+              }
+            }
+          }
+        } else {
+          if (mode === 'rush') {
+            rush.recordFailure();
+          }
         }
         return;
       }
       if (candidates.length > 0) {
         const record = executeMove(selected, square);
-        if (record && mode === 'ai') void requestAiMove(game);
+        if (record) {
+          playMoveHaptics(record.san);
+          if (mode === 'ai') void requestAiMove(game);
+        }
         return;
       }
     }
@@ -153,7 +235,10 @@ export default function Index() {
 
   const handlePromotion = (promotion: PromotionPiece) => {
     const record = handleGamePromotion(promotion);
-    if (record && mode === 'ai') void requestAiMove(game);
+    if (record) {
+      playMoveHaptics(record.san);
+      if (mode === 'ai') void requestAiMove(game);
+    }
   };
 
   const resetGame = () => {
@@ -169,7 +254,23 @@ export default function Index() {
   const selectMode = (nextMode: GameMode) => {
     if (nextMode === mode) return;
     setMode(nextMode);
-    resetGame();
+    rush.quitRush();
+    if (nextMode === 'ai') {
+      setDifficulty(activeBot.difficulty);
+      setPlayStyle(activeBot.playStyle);
+    }
+    if (nextMode === 'rush') {
+      rush.startRush();
+      nextRushPuzzle();
+    } else {
+      resetGame();
+    }
+  };
+
+  const selectBot = (bot: AiBot) => {
+    setActiveBot(bot);
+    setDifficulty(bot.difficulty);
+    setPlayStyle(bot.playStyle);
   };
 
   const openHomeAction = (action: 'play' | 'training' | 'settings') => {
@@ -177,6 +278,10 @@ export default function Index() {
     if (action === 'settings') setSettingsExpanded(true);
     setSection('play');
   };
+
+  if (!hasSeenOnboarding) {
+    return <OnboardingScreen onComplete={completeOnboarding} />;
+  }
 
   if (section === 'home') {
     const actions: readonly { label: string; detail: string; action: 'play' | 'training' | 'settings' }[] = [
@@ -196,7 +301,7 @@ export default function Index() {
         <View style={styles.homeStats}>
           <View style={styles.profileStat}><Text selectable numberOfLines={1} adjustsFontSizeToFit style={[styles.profileValue, styles.homeLevelValue]}>{playerLevel}</Text><Text selectable style={styles.profileLabel}>nivel</Text></View>
           <View style={styles.profileStat}><Text selectable style={styles.profileValue}>{gamification.xp}</Text><Text selectable style={styles.profileLabel}>XP</Text></View>
-          <View style={styles.profileStat}><Text selectable style={styles.profileValue}>{gamification.dailyStreak}</Text><Text selectable style={styles.profileLabel}>racha</Text></View>
+          <View style={styles.profileStat}><Text selectable style={styles.profileValue}>{chessStats.puzzleRushHighScore}</Text><Text selectable style={styles.profileLabel}>récord rush</Text></View>
         </View>
         <View style={styles.homeInfo}><Text selectable style={styles.profileTitle}>Reto diario</Text><Text selectable style={styles.profileWeaknesses}>{gamification.dailyChallenge ? `${gamification.dailyChallenge.title} · ${gamification.dailyChallenge.progress}/${gamification.dailyChallenge.target}` : 'Completa una actividad para activar tu reto.'}</Text><Text selectable style={styles.profileWeaknesses}>{nextAchievement ? `Próximo logro: ${nextAchievement.title}` : 'Todos los logros actuales desbloqueados.'}</Text></View>
         <View style={styles.homeActions}>{actions.map((item) => <Pressable key={item.label} accessibilityRole="button" onPress={() => openHomeAction(item.action)} style={({ pressed }) => [styles.homeAction, pressed && styles.pressed]}><Text style={styles.homeActionTitle}>{item.label}</Text><Text style={styles.homeActionDetail}>{item.detail}</Text></Pressable>)}</View>
@@ -229,26 +334,33 @@ export default function Index() {
         <Pressable accessibilityRole="radio" accessibilityState={{ checked: mode === 'ai' }} onPress={() => selectMode('ai')} style={[styles.modeOption, mode === 'ai' && styles.modeOptionActive]}>
           <Text style={[styles.modeText, mode === 'ai' && styles.modeTextActive]}>Jugar contra IA</Text>
         </Pressable>
+        <Pressable accessibilityRole="radio" accessibilityState={{ checked: mode === 'rush' }} onPress={() => selectMode('rush')} style={[styles.modeOption, mode === 'rush' && styles.modeOptionActive]}>
+          <Text style={[styles.modeText, mode === 'rush' && styles.modeTextActive]}>Supervivencia</Text>
+        </Pressable>
       </View>
 
       {mode === 'ai' ? (
         <View style={styles.difficultyCard}>
-          <Text selectable style={styles.difficultyLabel}>Dificultad · {difficultyDefinition(difficulty).name}</Text>
-          <View style={styles.difficultyOptions}>
-            {DIFFICULTIES.map((item) => (
+          <Text selectable style={styles.difficultyLabel}>Selecciona tu Oponente</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.difficultyOptions}>
+            {AI_BOTS.map((bot) => (
               <Pressable
-                key={item.level}
-                accessibilityLabel={`Dificultad ${item.name}`}
+                key={bot.id}
                 accessibilityRole="radio"
-                accessibilityState={{ checked: difficulty === item.level, disabled: thinking }}
+                accessibilityState={{ checked: activeBot.id === bot.id, disabled: thinking }}
                 disabled={thinking}
-                onPress={() => setDifficulty(item.level)}
-                style={[styles.difficultyOption, difficulty === item.level && styles.difficultyOptionActive]}
+                onPress={() => selectBot(bot)}
+                style={[styles.botOption, activeBot.id === bot.id && styles.botOptionActive]}
               >
-                <Text style={[styles.difficultyNumber, difficulty === item.level && styles.difficultyNumberActive]}>{item.level}</Text>
+                <Text style={styles.botAvatar}>{bot.avatar}</Text>
+                <View>
+                  <Text style={[styles.botName, activeBot.id === bot.id && styles.botNameActive]}>{bot.name}</Text>
+                  <Text style={[styles.botDesc, activeBot.id === bot.id && styles.botDescActive]}>Dificultad {bot.difficulty}</Text>
+                </View>
               </Pressable>
             ))}
-          </View>
+          </ScrollView>
+          <Text style={styles.botGreeting}>"{activeBot.greeting}"</Text>
         </View>
       ) : null}
 
@@ -266,10 +378,20 @@ export default function Index() {
       </Animated.View>
 
       {status.checkmate && status.winner === 'w' ? (
-        <Animated.View entering={FadeIn.duration(220)} style={styles.victoryBanner}>
-          <Text selectable style={styles.victoryTitle}>¡Victoria!</Text>
-          <Text selectable style={styles.victoryText}>El mate se ha registrado en tu progreso.</Text>
-        </Animated.View>
+        <VictoryCelebration />
+      ) : null}
+
+      {mode === 'rush' ? (
+        <PuzzleRushPanel
+          isActive={rush.isActive}
+          timeLeft={rush.timeLeft}
+          score={rush.score}
+          strikes={rush.strikes}
+          maxStrikes={rush.maxStrikes}
+          highScore={chessStats.puzzleRushHighScore}
+          onStart={() => selectMode('rush')}
+          onQuit={() => selectMode('local')}
+        />
       ) : null}
 
       <PostGamePanel status={status} postGameSummary={postGameSummary} />
@@ -326,66 +448,14 @@ export default function Index() {
         nextAchievement={nextAchievement}
       />
 
-      <View style={styles.settingsPanel}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded: settingsExpanded }}
-          onPress={() => setSettingsExpanded((expanded) => !expanded)}
-          style={({ pressed }) => [styles.settingsHeader, pressed && styles.pressed]}
-        >
-          <View>
-            <Text selectable style={styles.profileTitle}>Ajustes</Text>
-            <Text selectable style={styles.historySummary}>Tema, piezas y sonidos</Text>
-          </View>
-          <Text accessibilityElementsHidden style={styles.chevron}>{settingsExpanded ? '−' : '+'}</Text>
-        </Pressable>
-        {settingsExpanded ? (
-          <Animated.View entering={FadeIn.duration(160)} style={styles.settingsBody}>
-            <Text selectable style={styles.settingsLabel}>Tema del tablero</Text>
-            <View style={styles.preferenceOptions}>
-              {BOARD_THEMES.map((theme) => (
-                <Pressable key={theme.id} accessibilityRole="radio" accessibilityState={{ checked: visualPreferences.boardTheme === theme.id }} onPress={() => updateVisualPreferences({ boardTheme: theme.id })} style={[styles.preferenceOption, visualPreferences.boardTheme === theme.id && styles.preferenceOptionActive]}>
-                  <Text style={[styles.preferenceText, visualPreferences.boardTheme === theme.id && styles.preferenceTextActive]}>{theme.name}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <Text selectable style={styles.settingsLabel}>Piezas</Text>
-            <View style={styles.preferenceOptions}>
-              {PIECE_SETS.map((set) => (
-                <Pressable key={set.id} accessibilityRole="radio" accessibilityState={{ checked: visualPreferences.pieceSet === set.id }} onPress={() => updateVisualPreferences({ pieceSet: set.id })} style={[styles.preferenceOption, visualPreferences.pieceSet === set.id && styles.preferenceOptionActive]}>
-                  <Text style={[styles.preferenceText, visualPreferences.pieceSet === set.id && styles.preferenceTextActive]}>{set.name}</Text>
-                </Pressable>
-              ))}
-            </View>
-            <Pressable accessibilityRole="switch" accessibilityState={{ checked: visualPreferences.soundsEnabled }} onPress={() => updateVisualPreferences({ soundsEnabled: !visualPreferences.soundsEnabled })} style={styles.soundRow}>
-              <Text selectable style={styles.settingsLabel}>Sonidos</Text>
-              <Text selectable style={styles.soundValue}>{visualPreferences.soundsEnabled ? 'Activados' : 'Desactivados'}</Text>
-            </Pressable>
-          </Animated.View>
-        ) : null}
-      </View>
+      <SettingsPanel
+        expanded={settingsExpanded}
+        onToggle={() => setSettingsExpanded((e) => !e)}
+        visualPreferences={visualPreferences}
+        onUpdatePreferences={updateVisualPreferences}
+      />
 
-      <Animated.View layout={LinearTransition.duration(180)} style={styles.history}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded: historyExpanded }}
-          onPress={() => setHistoryExpanded((expanded) => !expanded)}
-          style={({ pressed }) => [styles.historyHeader, pressed && styles.pressed]}
-        >
-          <View>
-            <Text style={styles.historyTitle}>Historial SAN</Text>
-            <Text style={styles.historySummary}>{history.length > 0 ? `Última: ${history.at(-1)?.san}` : 'Sin jugadas'}</Text>
-          </View>
-          <Text accessibilityElementsHidden style={styles.chevron}>{historyExpanded ? '−' : '+'}</Text>
-        </Pressable>
-        {historyExpanded ? (
-          <Animated.View entering={FadeIn.duration(160)} style={styles.historyBody}>
-            <Text selectable style={styles.historyText}>
-              {history.length > 0 ? history.map((record, index) => `${index + 1}. ${record.san}`).join('   ') : 'El historial aparecerá después de la primera jugada.'}
-            </Text>
-          </Animated.View>
-        ) : null}
-      </Animated.View>
+      <HistoryPanel history={history} />
 
       <PromotionPicker
         visible={pendingPromotion !== null}
@@ -394,6 +464,15 @@ export default function Index() {
         onCancel={() => setPendingPromotion(null)}
       />
       <GameOverModal status={status} moveCount={history.length} onRematch={resetGame} onNewGame={resetGame} />
+      <PremiumUpsellModal
+        visible={showUpsell}
+        onClose={() => setShowUpsell(false)}
+        onUpgrade={() => {
+          setShowUpsell(false);
+          // In a real app, this would trigger the native IAP flow
+          alert('¡Gracias por tu interés en AjedrezPro Premium!');
+        }}
+      />
     </ScrollView>
   );
 }
@@ -425,10 +504,14 @@ const styles = StyleSheet.create({
   difficultyCard: { width: '100%', maxWidth: 440, gap: 8, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 17, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235' },
   difficultyLabel: { color: '#F6E6BD', fontSize: 12, fontWeight: '800' },
   difficultyOptions: { flexDirection: 'row', gap: 7 },
-  difficultyOption: { flex: 1, minHeight: 38, alignItems: 'center', justifyContent: 'center', borderRadius: 10, borderCurve: 'continuous', backgroundColor: '#22362C' },
-  difficultyOptionActive: { backgroundColor: '#D6A943' },
-  difficultyNumber: { color: '#C5D0C9', fontSize: 14, fontWeight: '900', fontVariant: ['tabular-nums'] },
-  difficultyNumberActive: { color: '#162019' },
+  botOption: { minWidth: 140, padding: 12, borderRadius: 12, borderCurve: 'continuous', backgroundColor: '#22362C', flexDirection: 'row', alignItems: 'center', gap: 10 },
+  botOptionActive: { backgroundColor: '#D6A943' },
+  botAvatar: { fontSize: 24 },
+  botName: { color: '#F8F4EA', fontSize: 13, fontWeight: '800' },
+  botNameActive: { color: '#162019' },
+  botDesc: { color: '#9EAFA5', fontSize: 11 },
+  botDescActive: { color: '#3B2D10' },
+  botGreeting: { color: '#9EAFA5', fontSize: 13, fontStyle: 'italic', marginTop: 8, paddingHorizontal: 4 },
   statusCard: { width: '100%', maxWidth: 440, minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 18, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235' },
   checkCard: { backgroundColor: '#321B17', borderColor: '#A84737' },
   turnDot: { width: 18, height: 18, borderRadius: 9, borderWidth: 2 },
@@ -439,9 +522,6 @@ const styles = StyleSheet.create({
   checkText: { color: '#FFD8CF' },
   statusDetail: { color: '#9EAFA5', fontSize: 12, paddingTop: 2 },
   checkBadge: { color: '#FFFFFF', backgroundColor: '#C44732', overflow: 'hidden', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 5, fontSize: 10, fontWeight: '900', letterSpacing: 0.7 },
-  victoryBanner: { width: '100%', maxWidth: 440, alignItems: 'center', gap: 2, padding: 14, borderRadius: 16, borderCurve: 'continuous', backgroundColor: '#3B2D10', borderWidth: 1, borderColor: '#D6A943' },
-  victoryTitle: { color: '#F7CE63', fontSize: 20, fontWeight: '900' },
-  victoryText: { color: '#F6E6BD', fontSize: 13 },
   actions: { width: '100%', maxWidth: 440, gap: 8 },
   newGameButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', backgroundColor: '#D6A943', borderRadius: 16, borderCurve: 'continuous' },
   pressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
@@ -453,25 +533,7 @@ const styles = StyleSheet.create({
   homeLevelValue: { fontSize: 15, textAlign: 'center' },
   profileLabel: { color: '#9EAFA5', fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
   profileWeaknesses: { color: '#C5D0C9', fontSize: 12, lineHeight: 18 },
-  settingsPanel: { width: '100%', maxWidth: 440, overflow: 'hidden', borderRadius: 18, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235' },
-  settingsHeader: { minHeight: 64, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  settingsBody: { gap: 9, borderTopWidth: 1, borderTopColor: '#294235', padding: 14 },
-  settingsLabel: { color: '#D6E0DA', fontSize: 13, fontWeight: '800' },
-  preferenceOptions: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  preferenceOption: { minHeight: 38, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center', borderRadius: 10, borderCurve: 'continuous', backgroundColor: '#22362C', borderWidth: 1, borderColor: '#3B5A49' },
-  preferenceOptionActive: { backgroundColor: '#D6A943', borderColor: '#D6A943' },
-  preferenceText: { color: '#C5D0C9', fontSize: 12, fontWeight: '800' },
-  preferenceTextActive: { color: '#162019' },
-  soundRow: { minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, borderRadius: 11, borderCurve: 'continuous', backgroundColor: '#22362C' },
-  soundValue: { color: '#F6E6BD', fontSize: 12, fontWeight: '900' },
   aiError: { width: '100%', maxWidth: 440, color: '#FFD8CF', backgroundColor: '#321B17', borderWidth: 1, borderColor: '#A84737', borderRadius: 12, borderCurve: 'continuous', padding: 12, fontSize: 13 },
-  history: { width: '100%', maxWidth: 440, overflow: 'hidden', borderRadius: 18, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235' },
-  historyHeader: { minHeight: 64, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  historyTitle: { color: '#F6E6BD', fontSize: 14, fontWeight: '800' },
-  historySummary: { color: '#9EAFA5', fontSize: 12, paddingTop: 3 },
-  chevron: { color: '#F5C451', fontSize: 28, fontWeight: '300' },
-  historyBody: { borderTopWidth: 1, borderTopColor: '#294235', padding: 16 },
-  historyText: { color: '#D6E0DA', fontSize: 14, lineHeight: 22, fontVariant: ['tabular-nums'] },
 });
 
 

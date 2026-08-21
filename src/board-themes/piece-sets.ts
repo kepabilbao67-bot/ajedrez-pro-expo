@@ -1,6 +1,6 @@
 import type { Piece } from '../chess';
 
-export type PieceSetId = 'classic' | 'modern' | '3d' | 'fantasy';
+export type PieceSetId = 'classic' | 'modern' | '3d' | 'fantasy' | 'minimalist';
 
 export interface PieceSetDefinition {
   readonly id: PieceSetId;
@@ -22,6 +22,7 @@ export const PIECE_SETS: readonly PieceSetDefinition[] = [
   { id: 'modern', name: 'Modern', availability: 'prepared', glyphs: CLASSIC_GLYPHS, whiteColor: '#FFFFFF', blackColor: '#111827', fontFamily: 'sans-serif' },
   { id: '3d', name: '3D', availability: 'prepared', glyphs: CLASSIC_GLYPHS, whiteColor: '#FFF4D7', blackColor: '#241B12', fontFamily: 'serif' },
   { id: 'fantasy', name: 'Fantasy', availability: 'prepared', glyphs: CLASSIC_GLYPHS, whiteColor: '#F5E6FF', blackColor: '#2B1538', fontFamily: 'serif' },
+  { id: 'minimalist', name: 'Minimalist', availability: 'prepared', glyphs: CLASSIC_GLYPHS, whiteColor: '#F8F9FA', blackColor: '#343A40', fontFamily: 'sans-serif' },
 ];
 
 export function pieceSetById(id: PieceSetId): PieceSetDefinition {

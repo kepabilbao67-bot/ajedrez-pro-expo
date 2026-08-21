@@ -1,6 +1,6 @@
 export type XpEvent = 'game-completed' | 'victory' | 'analysis-completed' | 'exercise-completed' | 'personal-improvement';
 export type PlayerLevel = 'Principiante' | 'Aprendiz' | 'Jugador' | 'Estratega' | 'Maestro';
-export type AchievementId = 'first-victory' | 'first-checkmate' | 'ten-games' | 'daily-streak' | 'level-improvement';
+export type AchievementId = 'first-victory' | 'first-checkmate' | 'ten-games' | 'hundred-games' | 'daily-streak' | 'weekly-streak' | 'level-improvement' | 'tactics-expert';
 export type DailyChallengeKind = 'game-completed' | 'analysis-completed' | 'exercise-completed';
 
 export interface AchievementProgress {

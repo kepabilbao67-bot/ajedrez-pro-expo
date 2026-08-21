@@ -66,7 +66,7 @@ describe('StockfishEngine', () => {
   it('uses the configured depth for a changed difficulty', async () => {
     const worker = new FakeStockfishWorker();
     const engine = new StockfishEngine({ workerFactory: () => worker, random: () => 0 });
-    await engine.analyze({ fen: ChessGame.initial().fen(), difficulty: 6, limits: { timeMs: 30, depth: 18 } });
+    await engine.analyze({ fen: ChessGame.initial().fen(), difficulty: 7, limits: { timeMs: 30, depth: 18 } });
     expect(worker.commands).toContain('setoption name MultiPV value 3');
     expect(worker.commands).toContain('go movetime 30 depth 18');
   });

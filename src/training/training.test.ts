@@ -43,8 +43,8 @@ describe('TrainingService', () => {
     expect(profile.training).toMatchObject({ attempted: 1, correct: 1, completed: 1 });
   });
 
-  it('loads fifty categorized exercises with legal core-validated solutions', () => {
-    expect(PUZZLE_LIBRARY).toHaveLength(50);
+  it('loads fifty-five categorized exercises with legal core-validated solutions', () => {
+    expect(PUZZLE_LIBRARY).toHaveLength(55);
     expect(new Set(PUZZLE_LIBRARY.map((item) => item.category))).toEqual(new Set(['mate-in-1', 'basic-tactics', 'win-material', 'defend-position', 'best-move']));
     for (const puzzle of PUZZLE_LIBRARY) {
       const game = new ChessGame(puzzle.fen);
