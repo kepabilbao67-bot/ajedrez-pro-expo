@@ -1,42 +1,46 @@
-import { useEffect, useState } from 'react';
-import { Audio } from 'expo-av';
+import { useAudioPlayer } from 'expo-audio';
 
-export function useAudioSfx() {
-  const [sounds, setSounds] = useState<{
-    move?: Audio.Sound;
-    capture?: Audio.Sound;
-    check?: Audio.Sound;
-    victory?: Audio.Sound;
-  }>({});
+export function useAudioSfx(enabled: boolean = true) {
+  const move = useAudioPlayer(require('../../assets/sounds/move.wav'));
+  const capture = useAudioPlayer(require('../../assets/sounds/capture.wav'));
+  const check = useAudioPlayer(require('../../assets/sounds/check.wav'));
+  const victory = useAudioPlayer(require('../../assets/sounds/victory.wav'));
 
-  useEffect(() => {
-    // In a real app, we would load local audio files here using require()
-    // For this demonstration, we'll try to load them if available or mock the API if they are missing
-    async function loadSounds() {
-      try {
-        // const { sound: move } = await Audio.Sound.createAsync(require('../../assets/sounds/move.mp3'));
-        // const { sound: capture } = await Audio.Sound.createAsync(require('../../assets/sounds/capture.mp3'));
-        // const { sound: check } = await Audio.Sound.createAsync(require('../../assets/sounds/check.mp3'));
-        // const { sound: victory } = await Audio.Sound.createAsync(require('../../assets/sounds/victory.mp3'));
-        // setSounds({ move, capture, check, victory });
-      } catch (e) {
-        console.warn('Audio files not found. Audio SFX disabled.', e);
-      }
-    }
-    void loadSounds();
+  const playMove = (): void => {
+    if (!enabled) return;
+    void move.seekTo(0).then(() => {
+      move.play();
+    }).catch(() => {
+      if (__DEV__) console.warn('Failed to play move sound');
+    });
+  };
 
-    return () => {
-      // Unload sounds to prevent memory leaks
-      Object.values(sounds).forEach(sound => {
-        sound?.unloadAsync().catch(() => {});
-      });
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const playCapture = (): void => {
+    if (!enabled) return;
+    void capture.seekTo(0).then(() => {
+      capture.play();
+    }).catch(() => {
+      if (__DEV__) console.warn('Failed to play capture sound');
+    });
+  };
 
-  const playMove = () => void sounds.move?.replayAsync().catch(() => {});
-  const playCapture = () => void sounds.capture?.replayAsync().catch(() => {});
-  const playCheck = () => void sounds.check?.replayAsync().catch(() => {});
-  const playVictory = () => void sounds.victory?.replayAsync().catch(() => {});
+  const playCheck = (): void => {
+    if (!enabled) return;
+    void check.seekTo(0).then(() => {
+      check.play();
+    }).catch(() => {
+      if (__DEV__) console.warn('Failed to play check sound');
+    });
+  };
+
+  const playVictory = (): void => {
+    if (!enabled) return;
+    void victory.seekTo(0).then(() => {
+      victory.play();
+    }).catch(() => {
+      if (__DEV__) console.warn('Failed to play victory sound');
+    });
+  };
 
   return { playMove, playCapture, playCheck, playVictory };
 }

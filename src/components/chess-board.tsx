@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, interpolate, useAnimatedStyle, useSharedValue, withTiming, ZoomIn } from 'react-native-reanimated';
@@ -88,7 +89,18 @@ export function ChessBoard({ position, size, selected, legalMoves, flipped, disa
               accessibilityRole="button"
               accessibilityState={{ disabled, selected: selected === square }}
               disabled={disabled}
-              onPress={() => onSquarePress(square)}
+              onPress={() => {
+                if (!disabled) {
+                  if (move) {
+                    Haptics.impactAsync(
+                      move.capture ? Haptics.ImpactFeedbackStyle.Medium : Haptics.ImpactFeedbackStyle.Light
+                    );
+                  } else if (piece) {
+                    Haptics.selectionAsync();
+                  }
+                  onSquarePress(square);
+                }
+              }}
               style={({ pressed }) => [
                 styles.square,
                 { width: squareSize, height: squareSize, backgroundColor: isLight ? boardTheme.lightSquare : boardTheme.darkSquare },

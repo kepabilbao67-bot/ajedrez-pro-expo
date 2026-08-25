@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChessGame } from '@/chess';
-import type { TrainingPuzzle } from '@/training/training-types';
 
 export interface UsePuzzleRushOptions {
   readonly onGameOver: (score: number) => void;
@@ -14,59 +12,91 @@ export function usePuzzleRush({ onGameOver }: UsePuzzleRushOptions) {
   const maxStrikes = 3;
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startRush = useCallback(() => {
-    setIsActive(true);
-    setTimeLeft(180);
-    setScore(0);
-    setStrikes(0);
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!);
-          setIsActive(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
-
-  const endRush = useCallback(() => {
-    setIsActive(false);
-    if (timerRef.current) clearInterval(timerRef.current);
-    onGameOver(score);
-  }, [onGameOver, score]);
+  const timeLeftRef = useRef(180);
+  const scoreRef = useRef(0);
+  const strikesRef = useRef(0);
+  const onGameOverRef = useRef(onGameOver);
+  const isEndingRef = useRef(false);
 
   useEffect(() => {
-    if (timeLeft === 0 && isActive) {
-      endRush();
+    onGameOverRef.current = onGameOver;
+  }, [onGameOver]);
+
+  const endRush = useCallback(() => {
+    if (isEndingRef.current) return;
+    isEndingRef.current = true;
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
-  }, [timeLeft, isActive, endRush]);
+
+    setIsActive(false);
+    onGameOverRef.current(scoreRef.current);
+  }, []);
+
+  const startRush = useCallback(() => {
+    isEndingRef.current = false;
+
+    setTimeLeft(180);
+    timeLeftRef.current = 180;
+
+    setScore(0);
+    scoreRef.current = 0;
+
+    setStrikes(0);
+    strikesRef.current = 0;
+
+    setIsActive(true);
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+
+    timerRef.current = setInterval(() => {
+      if (timeLeftRef.current <= 1) {
+        setTimeLeft(0);
+        timeLeftRef.current = 0;
+        endRush();
+      } else {
+        timeLeftRef.current -= 1;
+        setTimeLeft(timeLeftRef.current);
+      }
+    }, 1000);
+  }, [endRush]);
 
   const recordSuccess = useCallback(() => {
-    setScore((s) => s + 1);
+    if (isEndingRef.current) return;
+    scoreRef.current += 1;
+    setScore(scoreRef.current);
   }, []);
 
   const recordFailure = useCallback(() => {
-    setStrikes((s) => {
-      const next = s + 1;
-      if (next >= maxStrikes) {
-        endRush();
-      }
-      return next;
-    });
-  }, [endRush]);
+    if (isEndingRef.current) return;
+    strikesRef.current += 1;
+    setStrikes(strikesRef.current);
+    if (strikesRef.current >= maxStrikes) {
+      endRush();
+    }
+  }, [endRush, maxStrikes]);
 
   const quitRush = useCallback(() => {
+    isEndingRef.current = true;
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
     setIsActive(false);
-    if (timerRef.current) clearInterval(timerRef.current);
   }, []);
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
     };
   }, []);
 

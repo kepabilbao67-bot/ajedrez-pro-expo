@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 
@@ -31,7 +32,11 @@ export function PromotionPicker({ visible, color, onSelect, onCancel }: Promotio
                 <Pressable
                   accessibilityLabel={`Promocionar a ${option.label}`}
                   accessibilityRole="button"
-                  onPress={() => onSelect(option.value)}
+                  hitSlop={8}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    onSelect(option.value);
+                  }}
                   style={({ pressed }) => [styles.option, pressed && styles.pressed]}
                 >
                   <Text style={styles.symbol}>{color === 'w' ? option.white : option.black}</Text>
@@ -40,7 +45,7 @@ export function PromotionPicker({ visible, color, onSelect, onCancel }: Promotio
               </Animated.View>
             ))}
           </View>
-          <Pressable accessibilityRole="button" onPress={onCancel} style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}>
+          <Pressable hitSlop={12} accessibilityRole="button" onPress={() => { Haptics.selectionAsync(); onCancel(); }} style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}>
             <Text style={styles.cancelText}>Cancelar</Text>
           </Pressable>
         </Animated.View>

@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import Animated, { FadeIn, FadeInDown, LinearTransition } from 'react-native-reanimated';
+import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 
-import { DIFFICULTIES, difficultyDefinition } from '@/ai/difficulty';
-import type { PlayStyle } from '@/ai/types';
+import { difficultyDefinition } from '@/ai/difficulty';
 import type { PromotionPiece, Square } from '@/chess';
 import { ChessBoard } from '@/components/chess-board';
 import { CoachPanel } from '@/components/coach-panel';
@@ -18,8 +17,6 @@ import { SettingsPanel } from '@/components/settings-panel';
 import { PromotionPicker } from '@/components/promotion-picker';
 import { TrainingPanel } from '@/components/training-panel';
 import { VictoryCelebration } from '@/components/victory-celebration';
-import { BOARD_THEMES } from '@/board-themes/board-themes';
-import { PIECE_SETS } from '@/board-themes/piece-sets';
 import { useAiOpponent } from '@/hooks/use-ai-opponent';
 import { useChessGame } from '@/hooks/use-chess-game';
 import { useCoach } from '@/hooks/use-coach';
@@ -33,7 +30,6 @@ import { usePuzzleRush } from '@/hooks/use-puzzle-rush';
 import { useChessStats } from '@/hooks/use-chess-stats';
 import { AI_BOTS } from '@/ai/bots';
 import type { AiBot } from '@/ai/bots';
-import { XP_AWARDS } from '@/gamification/xp-types';
 import type { TrainingPuzzle } from '@/training/training-types';
 
 type GameMode = 'local' | 'ai' | 'rush';
@@ -63,7 +59,6 @@ export default function Index() {
   const {
     difficulty,
     setDifficulty,
-    playStyle,
     setPlayStyle,
     thinking,
     aiError,
@@ -128,7 +123,7 @@ export default function Index() {
   const [showUpsell, setShowUpsell] = useState(false);
   const completedGameGeneration = useRef<number | null>(null);
   const { hapticMove, hapticCapture, hapticCheck, hapticVictory } = useHaptics();
-  const { playMove, playCapture, playCheck, playVictory } = useAudioSfx();
+  const { playMove, playCapture, playCheck, playVictory } = useAudioSfx(visualPreferences.soundsEnabled);
   const { stats: chessStats, updatePuzzleRushScore, recordGame: recordGameStat } = useChessStats();
 
   useEffect(() => {
@@ -154,8 +149,10 @@ export default function Index() {
 
   useEffect(() => {
     if (coachMessage?.includes('límite')) {
-      setShowUpsell(true);
-      resetCoach();
+      setTimeout(() => {
+        setShowUpsell(true);
+        resetCoach();
+      }, 0);
     }
   }, [coachMessage, resetCoach]);
 
@@ -360,7 +357,7 @@ export default function Index() {
               </Pressable>
             ))}
           </ScrollView>
-          <Text style={styles.botGreeting}>"{activeBot.greeting}"</Text>
+          <Text style={styles.botGreeting}>&quot;{activeBot.greeting}&quot;</Text>
         </View>
       ) : null}
 

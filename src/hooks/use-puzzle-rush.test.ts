@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import * as React from 'react';
+import { usePuzzleRush } from './use-puzzle-rush';
 
 // We must mock react hooks to run simple hook logic without a DOM
 vi.mock('react', () => {
@@ -33,8 +33,6 @@ vi.mock('react', () => {
   };
 });
 
-import { usePuzzleRush } from './use-puzzle-rush';
-
 // Since we mock React state linearly, we need to reset between tests
 beforeEach(() => {
   vi.resetModules();
@@ -50,6 +48,7 @@ afterEach(() => {
 // by extracting it to a class, but we will skip the component test to avoid setup issues.
 describe('usePuzzleRush pure logic', () => {
   it('should be tested properly in an e2e or connected environment', () => {
+    expect(usePuzzleRush).toBeDefined();
     expect(true).toBe(true);
   });
 });

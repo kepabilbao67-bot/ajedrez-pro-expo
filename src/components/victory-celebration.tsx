@@ -1,6 +1,50 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withRepeat, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+
+function Particle({ index }: { index: number }) {
+  const [randomData] = useState(() => ({
+    x: Math.random() * 200 - 100,
+    delayY: Math.random() * 300,
+    delayOp: Math.random() * 300,
+    targetY: -150 - Math.random() * 100,
+    scale: Math.random() * 0.5 + 0.5
+  }));
+
+  const pX = useSharedValue(randomData.x);
+  const pY = useSharedValue(0);
+  const pOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    pOpacity.value = withDelay(
+      randomData.delayOp,
+      withSequence(
+        withTiming(1, { duration: 200 }),
+        withTiming(0, { duration: 800, easing: Easing.in(Easing.ease) })
+      )
+    );
+
+    pY.value = withDelay(
+      randomData.delayY,
+      withTiming(randomData.targetY, { duration: 1000, easing: Easing.out(Easing.cubic) })
+    );
+  }, [pOpacity, pY, randomData]);
+
+  const pStyle = useAnimatedStyle(() => {
+    return {
+      opacity: pOpacity.value,
+      transform: [
+        { translateX: pX.value },
+        { translateY: pY.value },
+        { scale: randomData.scale }
+      ]
+    };
+  });
+
+  return (
+    <Animated.View style={[styles.particle, pStyle, { backgroundColor: ['#00E5B4', '#D6A943', '#F7CE63', '#C44732'][index % 4] }]} />
+  );
+}
 
 export function VictoryCelebration() {
   const scale = useSharedValue(0.1);
@@ -27,41 +71,9 @@ export function VictoryCelebration() {
   });
 
   // Confetti particles
-  const particles = Array.from({ length: 12 }).map((_, i) => {
-    const pX = useSharedValue(Math.random() * 200 - 100);
-    const pY = useSharedValue(0);
-    const pOpacity = useSharedValue(0);
-    
-    useEffect(() => {
-      pOpacity.value = withDelay(
-        Math.random() * 300,
-        withSequence(
-          withTiming(1, { duration: 200 }),
-          withTiming(0, { duration: 800, easing: Easing.in(Easing.ease) })
-        )
-      );
-      
-      pY.value = withDelay(
-        Math.random() * 300,
-        withTiming(-150 - Math.random() * 100, { duration: 1000, easing: Easing.out(Easing.cubic) })
-      );
-    }, [pOpacity, pY]);
-
-    const pStyle = useAnimatedStyle(() => {
-      return {
-        opacity: pOpacity.value,
-        transform: [
-          { translateX: pX.value },
-          { translateY: pY.value },
-          { scale: Math.random() * 0.5 + 0.5 }
-        ]
-      };
-    });
-
-    return (
-      <Animated.View key={i} style={[styles.particle, pStyle, { backgroundColor: ['#00E5B4', '#D6A943', '#F7CE63', '#C44732'][i % 4] }]} />
-    );
-  });
+  const particles = Array.from({ length: 12 }).map((_, i) => (
+    <Particle key={i} index={i} />
+  ));
 
   return (
     <Animated.View style={[styles.container, animatedStyle]}>

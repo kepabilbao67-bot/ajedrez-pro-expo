@@ -17,22 +17,23 @@ export const useChessStats = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadStats = useCallback(async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem(STATS_KEY);
-      if (jsonValue != null) {
-        setStats(JSON.parse(jsonValue));
-      }
-    } catch (e) {
-      console.error("Error loading chess stats", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    void loadStats();
-  }, [loadStats]);
+    let ignore = false;
+    async function doLoad() {
+      try {
+        const jsonValue = await AsyncStorage.getItem(STATS_KEY);
+        if (!ignore && jsonValue != null) {
+          setStats(JSON.parse(jsonValue));
+        }
+      } catch (e) {
+        console.error("Error loading chess stats", e);
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    }
+    void doLoad();
+    return () => { ignore = true; };
+  }, []);
 
   const saveStats = async (newStats: ChessStats) => {
     try {
