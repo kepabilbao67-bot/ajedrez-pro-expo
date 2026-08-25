@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 
 import { difficultyDefinition } from '@/ai/difficulty';
@@ -368,7 +368,7 @@ export default function Index() {
             {thinking ? 'Pensando…' : message}
           </Text>
           <Text selectable style={styles.statusDetail}>
-            {thinking ? `${difficultyDefinition(difficulty).name} · Stockfish 18` : status.gameOver ? 'La partida ha finalizado' : selected === null ? 'Toca una pieza para ver sus movimientos' : 'Elige una casilla marcada'}
+            {thinking ? `${difficultyDefinition(difficulty).name} · ${Platform.OS === 'web' ? 'Stockfish 18' : 'Motor local'}` : status.gameOver ? 'La partida ha finalizado' : selected === null ? 'Toca una pieza para ver sus movimientos' : 'Elige una casilla marcada'}
           </Text>
         </View>
         {status.check && !status.checkmate ? <Text accessibilityLabel="Jaque" style={styles.checkBadge}>JAQUE</Text> : null}

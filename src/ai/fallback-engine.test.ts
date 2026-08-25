@@ -101,7 +101,7 @@ describe('FallbackAiEngine - Unit Tests', () => {
   });
 
   it('5. Promotion: promotes pawn legally with promotion piece', async () => {
-    const engine = new FallbackAiEngine({ maxDepth: 2 });
+    const engine = new FallbackAiEngine({ maxDepth: 2, random: () => 0 });
     // White pawn on e7 with empty promotion square e8, Black king on a8
     const fen = 'k7/4P3/8/8/8/8/8/4K3 w - - 0 1';
     const game = new ChessGame(fen);

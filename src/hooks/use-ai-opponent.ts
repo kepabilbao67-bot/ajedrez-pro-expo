@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 
 import { playAiTurn } from '@/ai/ai-opponent';
 import { AiCancelledError } from '@/ai/errors';
 import { getOpeningMove } from '@/ai/opening-book';
-import { StockfishEngine } from '@/ai/stockfish-engine';
+import { createAiEngine } from '@/ai/engine-factory';
+import type { AiEngine } from '@/ai/engine-adapter';
 import type { DifficultyLevel, PlayStyle } from '@/ai/types';
 import type { ChessGame, MoveInput, MoveRecord, PromotionPiece } from '@/chess';
 import { canAccessDifficulty } from '@/premium/premium-policy';
@@ -26,7 +27,7 @@ export interface UseAiOpponentResult {
   readonly clearAiError: () => void;
   readonly cancelAi: () => void;
   readonly requestAiMove: (targetGame: ChessGame) => Promise<void>;
-  readonly getEngine: () => StockfishEngine;
+  readonly getEngine: () => AiEngine;
 }
 
 export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResult {
@@ -49,11 +50,11 @@ export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResul
     [premiumStatus],
   );
 
-  const engineRef = useRef<StockfishEngine | null>(null);
+  const engineRef = useRef<AiEngine | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const getEngine = useCallback((): StockfishEngine => {
-    engineRef.current ??= new StockfishEngine();
+  const getEngine = useCallback((): AiEngine => {
+    engineRef.current ??= createAiEngine();
     return engineRef.current;
   }, []);
 
@@ -119,7 +120,7 @@ export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResul
   useEffect(
     () => () => {
       abortRef.current?.abort();
-      engineRef.current?.dispose();
+      engineRef.current?.dispose?.();
     },
     [],
   );
