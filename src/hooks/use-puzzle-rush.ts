@@ -38,8 +38,9 @@ export function usePuzzleRush({ onGameOver }: UsePuzzleRushOptions) {
   const startRush = useCallback(() => {
     isEndingRef.current = false;
 
-    setTimeLeft(180);
-    timeLeftRef.current = 180;
+    const duration = 180;
+    setTimeLeft(duration);
+    timeLeftRef.current = duration;
 
     setScore(0);
     scoreRef.current = 0;
@@ -53,14 +54,19 @@ export function usePuzzleRush({ onGameOver }: UsePuzzleRushOptions) {
       clearInterval(timerRef.current);
     }
 
+    const endTime = Date.now() + duration * 1000;
+
     timerRef.current = setInterval(() => {
-      if (timeLeftRef.current <= 1) {
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((endTime - now) / 1000));
+
+      if (remaining <= 0) {
         setTimeLeft(0);
         timeLeftRef.current = 0;
         endRush();
       } else {
-        timeLeftRef.current -= 1;
-        setTimeLeft(timeLeftRef.current);
+        timeLeftRef.current = remaining;
+        setTimeLeft(remaining);
       }
     }, 1000);
   }, [endRush]);

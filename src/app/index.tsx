@@ -248,6 +248,12 @@ export default function Index() {
   const requestHint = () => requestCoachHint(game, difficulty);
   const analyzeCurrentGame = () => runGameAnalysis(history, status);
 
+  const startRushSession = () => {
+    setMode('rush');
+    rush.startRush();
+    nextRushPuzzle();
+  };
+
   const selectMode = (nextMode: GameMode) => {
     if (nextMode === mode) return;
     setMode(nextMode);
@@ -257,8 +263,7 @@ export default function Index() {
       setPlayStyle(activeBot.playStyle);
     }
     if (nextMode === 'rush') {
-      rush.startRush();
-      nextRushPuzzle();
+      startRushSession();
     } else {
       resetGame();
     }
@@ -386,7 +391,7 @@ export default function Index() {
           strikes={rush.strikes}
           maxStrikes={rush.maxStrikes}
           highScore={chessStats.puzzleRushHighScore}
-          onStart={() => selectMode('rush')}
+          onStart={startRushSession}
           onQuit={() => selectMode('local')}
         />
       ) : null}
