@@ -30,10 +30,10 @@ export const AI_BOTS: readonly AiBot[] = [
     playStyle: 'Tactical',
   },
   {
-    id: 'magnus',
-    name: 'Maestro Magnus',
+    id: 'nexus',
+    name: 'Maestro Nexus',
     avatar: '🧙‍♂️',
-    description: 'Gran Maestro legendario',
+    description: 'Inteligencia Suprema',
     greeting: 'El ajedrez es comprensión pura. Veamos qué tienes.',
     difficulty: 8,
     playStyle: 'Positional',

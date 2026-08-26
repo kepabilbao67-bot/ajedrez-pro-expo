@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { BOARD_THEMES } from '@/board-themes/board-themes';
 import { PIECE_SETS } from '@/board-themes/piece-sets';
@@ -12,6 +13,8 @@ export interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ expanded, onToggle, visualPreferences, onUpdatePreferences }: SettingsPanelProps) {
+  const [legalVisible, setLegalVisible] = useState(false);
+
   return (
     <View style={styles.settingsPanel}>
       <Pressable
@@ -48,8 +51,39 @@ export function SettingsPanel({ expanded, onToggle, visualPreferences, onUpdateP
             <Text selectable style={styles.settingsLabel}>Sonidos</Text>
             <Text selectable style={styles.soundValue}>{visualPreferences.soundsEnabled ? 'Activados' : 'Desactivados'}</Text>
           </Pressable>
+          <Pressable accessibilityRole="button" onPress={() => setLegalVisible(true)} style={styles.legalButton}>
+            <Text style={styles.legalText}>Privacidad y Licencias</Text>
+          </Pressable>
         </Animated.View>
       ) : null}
+
+      <Modal visible={legalVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setLegalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Privacidad y Licencias</Text>
+          <ScrollView style={styles.modalScroll}>
+            <Text style={styles.modalSubtitle}>Política de Privacidad</Text>
+            <Text style={styles.modalParagraph}>
+              AjedrezPro valora tu privacidad. Toda la información, estadísticas, nivel y progreso generados se almacenan exclusivamente de forma local en tu dispositivo.
+              No requerimos la creación de cuentas, no enviamos datos de uso a servidores externos, no incluimos analíticas ni mostramos publicidad de terceros.
+              No se comparten datos personales con ninguna entidad.
+            </Text>
+
+            <Text style={styles.modalSubtitle}>Licencias y Código Abierto</Text>
+            <Text style={styles.modalParagraph}>
+              Esta aplicación incluye el motor de ajedrez Stockfish para los análisis web.
+              Stockfish es software libre y de código abierto (GPLv3).
+              {'\n\n'}
+              Stockfish 16.1{'\n'}
+              Copyright (C) 2008-2024 The Stockfish developers{'\n'}
+              Puedes obtener el código fuente y más información en:{'\n'}
+              https://stockfishchess.org/ y https://github.com/official-stockfish/Stockfish
+            </Text>
+          </ScrollView>
+          <Pressable style={styles.closeButton} onPress={() => setLegalVisible(false)}>
+            <Text style={styles.closeButtonText}>Cerrar</Text>
+          </Pressable>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -70,4 +104,13 @@ const styles = StyleSheet.create({
   soundRow: { minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, borderRadius: 11, borderCurve: 'continuous', backgroundColor: '#22362C' },
   soundValue: { color: '#F6E6BD', fontSize: 12, fontWeight: '900' },
   pressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
+  legalButton: { minHeight: 42, alignItems: 'center', justifyContent: 'center', marginTop: 8, borderRadius: 11, backgroundColor: '#1B3025', borderWidth: 1, borderColor: '#294235' },
+  legalText: { color: '#D6E0DA', fontSize: 12, fontWeight: '700' },
+  modalContainer: { flex: 1, backgroundColor: '#09130f', padding: 24, paddingTop: 48 },
+  modalTitle: { color: '#F6E6BD', fontSize: 24, fontWeight: '900', marginBottom: 16 },
+  modalScroll: { flex: 1 },
+  modalSubtitle: { color: '#F5C451', fontSize: 16, fontWeight: '800', marginTop: 16, marginBottom: 8 },
+  modalParagraph: { color: '#C5D0C9', fontSize: 14, lineHeight: 22 },
+  closeButton: { marginTop: 24, paddingVertical: 16, backgroundColor: '#D6A943', borderRadius: 16, alignItems: 'center' },
+  closeButtonText: { color: '#162019', fontSize: 16, fontWeight: '900' },
 });

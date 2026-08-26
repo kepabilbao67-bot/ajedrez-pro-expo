@@ -1,5 +1,4 @@
 import type { DailyUsage, PremiumFeature, PremiumStatus } from './premium-types';
-import { FREE_DAILY_LIMITS } from './premium-types';
 
 /** Pure check for active Pro status, accounting for lifetime and expiration. */
 export function isPro(status: PremiumStatus): boolean {
@@ -15,31 +14,27 @@ export function isPro(status: PremiumStatus): boolean {
 
 /** Check if a specific premium feature is unlocked for the user. */
 export function canUseFeature(feature: PremiumFeature, status: PremiumStatus): boolean {
-  return isPro(status);
+  return true; // V1: All features unlocked
 }
 
 /** Check if a Stockfish difficulty level is allowed (Free allows 1-3, Pro allows 1-5). */
 export function canAccessDifficulty(level: number, status: PremiumStatus): boolean {
-  if (isPro(status)) return true;
-  return level <= FREE_DAILY_LIMITS.maxStockfishDifficulty;
+  return true; // V1: All difficulties unlocked
 }
 
 /** Check if coach hints can be used under daily quotas (Free: max 3/day, Pro: unlimited). */
 export function canUseCoachHint(usage: DailyUsage, status: PremiumStatus): boolean {
-  if (isPro(status)) return true;
-  return usage.hintsUsed < FREE_DAILY_LIMITS.maxHintsPerDay;
+  return true; // V1: Unlimited hints
 }
 
 /** Check if game analysis can be executed under daily quotas (Free: max 1/day, Pro: unlimited). */
 export function canRunAnalysis(usage: DailyUsage, status: PremiumStatus): boolean {
-  if (isPro(status)) return true;
-  return usage.analysesRun < FREE_DAILY_LIMITS.maxAnalysesPerDay;
+  return true; // V1: Unlimited analysis
 }
 
 /** Check if a board theme can be selected (Free: classic, Pro: all themes). */
 export function canSelectTheme(themeId: string, status: PremiumStatus): boolean {
-  if (isPro(status)) return true;
-  return (FREE_DAILY_LIMITS.allowedThemeIds as readonly string[]).includes(themeId);
+  return true; // V1: All themes unlocked
 }
 
 /** Normalizes daily usage, resetting counters if the current date has changed. */

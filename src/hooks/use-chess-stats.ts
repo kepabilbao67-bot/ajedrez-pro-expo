@@ -23,7 +23,20 @@ export const useChessStats = () => {
       try {
         const jsonValue = await AsyncStorage.getItem(STATS_KEY);
         if (!ignore && jsonValue != null) {
-          setStats(JSON.parse(jsonValue));
+          try {
+            const parsed = JSON.parse(jsonValue);
+            if (parsed && typeof parsed === 'object' && 'puzzleRushHighScore' in parsed) {
+              setStats({
+                puzzleRushHighScore: typeof parsed.puzzleRushHighScore === 'number' ? parsed.puzzleRushHighScore : 0,
+                totalWins: typeof parsed.totalWins === 'number' ? parsed.totalWins : 0,
+                gamesPlayed: typeof parsed.gamesPlayed === 'number' ? parsed.gamesPlayed : 0,
+              });
+            } else {
+              await AsyncStorage.removeItem(STATS_KEY);
+            }
+          } catch {
+            await AsyncStorage.removeItem(STATS_KEY);
+          }
         }
       } catch (e) {
         console.error("Error loading chess stats", e);
