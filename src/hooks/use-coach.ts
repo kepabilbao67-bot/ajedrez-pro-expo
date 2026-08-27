@@ -11,15 +11,10 @@ import type { AiEngine } from '@/ai/engine-adapter';
 import type { DifficultyLevel } from '@/ai/types';
 import type { ChessGame, GameStatus, MoveRecord } from '@/chess';
 
-import { canRunAnalysis, canUseCoachHint } from '@/premium/premium-policy';
-import type { DailyUsage, PremiumStatus } from '@/premium/premium-types';
-import { DEFAULT_DAILY_USAGE } from '@/premium/premium-types';
+
 
 export interface UseCoachOptions {
   readonly getEngine: () => AiEngine;
-  readonly premiumStatus?: PremiumStatus;
-  readonly dailyUsage?: DailyUsage;
-  readonly onConsumeUsage?: (action: 'hint' | 'analysis') => void;
   readonly onHintUsed?: () => void;
   readonly onAnalysisCompleted?: (report: GameAnalysis) => void;
 }
@@ -39,7 +34,7 @@ export interface UseCoachResult {
 }
 
 export function useCoach(options: UseCoachOptions): UseCoachResult {
-  const { getEngine, premiumStatus, dailyUsage, onConsumeUsage, onHintUsed, onAnalysisCompleted } = options;
+  const { getEngine, onHintUsed, onAnalysisCompleted } = options;
   const [coachLoading, setCoachLoading] = useState(false);
   const [coachMessage, setCoachMessage] = useState<string | null>(null);
   const [coachReport, setCoachReport] = useState<GameAnalysis | null>(null);
@@ -62,14 +57,6 @@ export function useCoach(options: UseCoachOptions): UseCoachResult {
 
   const requestHint = useCallback(
     async (game: ChessGame, difficulty: DifficultyLevel) => {
-      const currentStatus = premiumStatus ?? { tier: 'free' };
-      const currentUsage = dailyUsage ?? DEFAULT_DAILY_USAGE;
-
-      if (!canUseCoachHint(currentUsage, currentStatus)) {
-        setCoachMessage('Has alcanzado el límite diario de 3 pistas gratuitas. Pistas ilimitadas disponibles en Pro.');
-        return;
-      }
-
       const requestedLevel = hintLevel;
       setHintLevel((level) => (level === 3 ? 1 : ((level + 1) as CoachHintLevel)));
       const status = game.status();
@@ -93,7 +80,6 @@ export function useCoach(options: UseCoachOptions): UseCoachResult {
         setCoachMessage(hint.message);
         if (hint.available) {
           onHintUsed?.();
-          onConsumeUsage?.('hint');
         }
       } catch (error) {
         if (!(error instanceof AiCancelledError)) {
@@ -104,20 +90,12 @@ export function useCoach(options: UseCoachOptions): UseCoachResult {
         setCoachLoading(false);
       }
     },
-    [dailyUsage, getEngine, hintLevel, onConsumeUsage, onHintUsed, premiumStatus],
+    [getEngine, hintLevel, onHintUsed],
   );
 
   const analyzeCurrentGame = useCallback(
     async (history: readonly MoveRecord[], status: GameStatus) => {
       if (history.length === 0) return;
-
-      const currentStatus = premiumStatus ?? { tier: 'free' };
-      const currentUsage = dailyUsage ?? DEFAULT_DAILY_USAGE;
-
-      if (!canRunAnalysis(currentUsage, currentStatus)) {
-        setCoachMessage('Has alcanzado el límite de 1 análisis diario gratuito. Análisis ilimitado disponible en Pro.');
-        return;
-      }
 
       setCoachLoading(true);
       setCoachMessage(null);
@@ -151,7 +129,6 @@ export function useCoach(options: UseCoachOptions): UseCoachResult {
         const report: GameAnalysis = analyzeGame({ moves: history, evaluations, result });
         setCoachReport(report);
         onAnalysisCompleted?.(report);
-        onConsumeUsage?.('analysis');
         setCoachMessage(report.criticalMoment ? `${report.summary} ${report.criticalMoment.explanation}` : report.summary);
       } catch (error) {
         if (!(error instanceof AiCancelledError)) {
@@ -162,7 +139,7 @@ export function useCoach(options: UseCoachOptions): UseCoachResult {
         setCoachLoading(false);
       }
     },
-    [dailyUsage, getEngine, onAnalysisCompleted, onConsumeUsage, premiumStatus],
+    [getEngine, onAnalysisCompleted],
   );
 
   const contextualCoachMessage = useCallback((status: GameStatus, historyLength: number) => {

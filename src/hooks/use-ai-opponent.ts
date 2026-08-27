@@ -7,14 +7,11 @@ import { createAiEngine } from '@/ai/engine-factory';
 import type { AiEngine } from '@/ai/engine-adapter';
 import type { DifficultyLevel, PlayStyle } from '@/ai/types';
 import type { ChessGame, MoveInput, MoveRecord, PromotionPiece } from '@/chess';
-import { canAccessDifficulty } from '@/premium/premium-policy';
-import type { PremiumStatus } from '@/premium/premium-types';
 
 export interface UseAiOpponentOptions {
   readonly initialDifficulty?: DifficultyLevel;
   readonly generationRef: MutableRefObject<number>;
   readonly onMoveApplied: (record: MoveRecord, targetGame: ChessGame) => void;
-  readonly premiumStatus?: PremiumStatus;
 }
 
 export interface UseAiOpponentResult {
@@ -31,7 +28,7 @@ export interface UseAiOpponentResult {
 }
 
 export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResult {
-  const { initialDifficulty = 3, generationRef, onMoveApplied, premiumStatus } = options;
+  const { initialDifficulty = 3, generationRef, onMoveApplied } = options;
   const [difficulty, setDifficultyState] = useState<DifficultyLevel>(initialDifficulty);
   const [playStyle, setPlayStyle] = useState<PlayStyle>('Balanced');
   const [thinking, setThinking] = useState(false);
@@ -39,15 +36,10 @@ export function useAiOpponent(options: UseAiOpponentOptions): UseAiOpponentResul
 
   const setDifficulty = useCallback(
     (nextDifficulty: DifficultyLevel) => {
-      const currentStatus = premiumStatus ?? { tier: 'free' };
-      if (!canAccessDifficulty(nextDifficulty, currentStatus)) {
-        setAiError(`La dificultad ${nextDifficulty} (Stockfish Maestro) requiere AjedrezPro Pro.`);
-        return;
-      }
       setAiError(null);
       setDifficultyState(nextDifficulty);
     },
-    [premiumStatus],
+    [],
   );
 
   const engineRef = useRef<AiEngine | null>(null);

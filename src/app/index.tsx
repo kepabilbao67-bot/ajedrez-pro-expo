@@ -10,7 +10,7 @@ import { GameOverModal } from '@/components/game-over-modal';
 import { HistoryPanel } from '@/components/history-panel';
 import { OnboardingScreen } from '@/components/onboarding-screen';
 import { PostGamePanel } from '@/components/post-game-panel';
-import { PremiumUpsellModal } from '@/components/premium-upsell';
+
 import { ProfilePanel } from '@/components/profile-panel';
 import { PuzzleRushPanel } from '@/components/puzzle-rush-panel';
 import { SettingsPanel } from '@/components/settings-panel';
@@ -21,7 +21,7 @@ import { useAiOpponent } from '@/hooks/use-ai-opponent';
 import { useChessGame } from '@/hooks/use-chess-game';
 import { useCoach } from '@/hooks/use-coach';
 import { usePlayerProgress } from '@/hooks/use-player-progress';
-import { usePremium } from '@/hooks/use-premium';
+
 import { useTrainingSession } from '@/hooks/use-training-session';
 import { useVisualPreferences } from '@/hooks/use-visual-preferences';
 import { useHaptics } from '@/hooks/use-haptics';
@@ -37,7 +37,7 @@ type AppSection = 'home' | 'play';
 
 export default function Index() {
   const { width, height } = useWindowDimensions();
-  const { premiumStatus, dailyUsage, consumeUsage } = usePremium();
+
   const {
     game,
     position,
@@ -67,7 +67,6 @@ export default function Index() {
     getEngine: getStockfishEngine,
   } = useAiOpponent({
     generationRef,
-    premiumStatus,
     onMoveApplied: (record, targetGame) => {
       refresh(record, targetGame);
       playMoveHaptics(record.san);
@@ -98,15 +97,10 @@ export default function Index() {
     resetCoach,
   } = useCoach({
     getEngine: getStockfishEngine,
-    premiumStatus,
-    dailyUsage,
-    onConsumeUsage: consumeUsage,
     onHintUsed: recordHint,
     onAnalysisCompleted: recordAnalysis,
   });
-  const { visualPreferences, boardTheme, pieceSet, updateVisualPreferences } = useVisualPreferences({
-    premiumStatus,
-  });
+  const { visualPreferences, boardTheme, pieceSet, updateVisualPreferences } = useVisualPreferences();
   const {
     activePuzzle,
     puzzleFeedback,
@@ -120,7 +114,7 @@ export default function Index() {
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [section, setSection] = useState<AppSection>('home');
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(true); // assume true until loaded
-  const [showUpsell, setShowUpsell] = useState(false);
+
   const completedGameGeneration = useRef<number | null>(null);
   const { hapticMove, hapticCapture, hapticCheck, hapticVictory } = useHaptics();
   const { playMove, playCapture, playCheck, playVictory } = useAudioSfx(visualPreferences.soundsEnabled);
@@ -147,14 +141,7 @@ export default function Index() {
     },
   });
 
-  useEffect(() => {
-    if (coachMessage?.includes('límite')) {
-      setTimeout(() => {
-        setShowUpsell(true);
-        resetCoach();
-      }, 0);
-    }
-  }, [coachMessage, resetCoach]);
+
 
   const playMoveHaptics = (san: string) => {
     if (san.includes('#')) { hapticVictory(); playVictory(); }
@@ -466,15 +453,7 @@ export default function Index() {
         onCancel={() => setPendingPromotion(null)}
       />
       <GameOverModal status={status} moveCount={history.length} onRematch={resetGame} onNewGame={resetGame} />
-      <PremiumUpsellModal
-        visible={showUpsell}
-        onClose={() => setShowUpsell(false)}
-        onUpgrade={() => {
-          setShowUpsell(false);
-          // In a real app, this would trigger the native IAP flow
-          alert('¡Gracias por tu interés en AjedrezPro Premium!');
-        }}
-      />
+
     </ScrollView>
   );
 }
