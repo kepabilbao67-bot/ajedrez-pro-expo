@@ -38,7 +38,7 @@ describe('Engine Factory', () => {
     const engineWeb = createAiEngine();
     expect(engineWeb.analyze).toBeDefined();
     expect(engineWeb.id).toBeDefined();
-    
+
     Platform.OS = 'android';
     const engineAndroid = createAiEngine();
     expect(engineAndroid.analyze).toBeDefined();
@@ -50,10 +50,10 @@ describe('FallbackAiEngine Integration', () => {
   test('5. Una jugada negra legal puede generarse y aplicarse con el fallback', async () => {
     const engine = new FallbackAiEngine();
     const game = new ChessGame();
-    
+
     // Juega blancas (e4)
     game.move({ from: 'e2', to: 'e4' });
-    
+
     // Analiza para negras
     const analysis = await engine.analyze({
       fen: game.fen(),
@@ -61,15 +61,15 @@ describe('FallbackAiEngine Integration', () => {
       limits: { depth: 1 },
       playStyle: 'Balanced',
     });
-    
+
     expect(analysis.bestMove).toBeDefined();
     expect(analysis.bestMove).not.toBeNull();
-    
+
     // Aplicar la jugada
-    const record = game.move({ 
-      from: analysis.bestMove!.from, 
-      to: analysis.bestMove!.to, 
-      promotion: analysis.bestMove!.promotion 
+    const record = game.move({
+      from: analysis.bestMove!.from,
+      to: analysis.bestMove!.to,
+      promotion: analysis.bestMove!.promotion
     });
     expect(record).not.toBeNull();
   });
@@ -78,9 +78,9 @@ describe('FallbackAiEngine Integration', () => {
     const engine = new FallbackAiEngine();
     const game = new ChessGame();
     const controller = new AbortController();
-    
+
     controller.abort(); // Cancelar inmediatamente
-    
+
     await expect(engine.analyze({
       fen: game.fen(),
       difficulty: 3,
