@@ -6,6 +6,6 @@ describe('commercial theme catalog', () => {
   it('keeps Classic free and premium styles prepared', () => {
     expect(BOARD_THEMES.find((theme) => theme.id === 'classic')?.availability).toBe('free');
     expect(BOARD_THEMES.filter((theme) => theme.availability === 'prepared')).not.toHaveLength(0);
-    expect(PIECE_SETS.map((set) => set.name)).toContain('3D');
+    expect(PIECE_SETS.map((set) => set.name)).toContain('Realista 3D (2.5D)');
   });
 });

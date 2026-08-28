@@ -459,6 +459,7 @@ export default function Index() {
       <PromotionPicker
         visible={pendingPromotion !== null}
         color={position.turn}
+        pieceSetId={visualPreferences.pieceSet}
         onSelect={handlePromotion}
         onCancel={() => setPendingPromotion(null)}
       />
