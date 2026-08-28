@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
 
 import { difficultyDefinition } from '@/ai/difficulty';
 import type { PromotionPiece, Square } from '@/chess';
@@ -36,6 +37,7 @@ type GameMode = 'local' | 'ai' | 'rush';
 type AppSection = 'home' | 'play';
 
 export default function Index() {
+  const router = useRouter();
   const { width, height } = useWindowDimensions();
 
   const {
@@ -294,6 +296,14 @@ export default function Index() {
         </View>
         <View style={styles.homeInfo}><Text selectable style={styles.profileTitle}>Reto diario</Text><Text selectable style={styles.profileWeaknesses}>{gamification.dailyChallenge ? `${gamification.dailyChallenge.title} · ${gamification.dailyChallenge.progress}/${gamification.dailyChallenge.target}` : 'Completa una actividad para activar tu reto.'}</Text><Text selectable style={styles.profileWeaknesses}>{nextAchievement ? `Próximo logro: ${nextAchievement.title}` : 'Todos los logros actuales desbloqueados.'}</Text></View>
         <View style={styles.homeActions}>{actions.map((item) => <Pressable key={item.label} accessibilityRole="button" onPress={() => openHomeAction(item.action)} style={({ pressed }) => [styles.homeAction, pressed && styles.pressed]}><Text style={styles.homeActionTitle}>{item.label}</Text><Text style={styles.homeActionDetail}>{item.detail}</Text></Pressable>)}</View>
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel="Abrir política de privacidad"
+          onPress={() => router.push('/privacy' as never)}
+          style={({ pressed }) => [styles.privacyFooterLink, pressed && styles.pressed]}
+        >
+          <Text style={styles.privacyFooterText}>Política de Privacidad</Text>
+        </Pressable>
       </ScrollView>
     );
   }
@@ -453,7 +463,6 @@ export default function Index() {
         onCancel={() => setPendingPromotion(null)}
       />
       <GameOverModal status={status} moveCount={history.length} onRematch={resetGame} onNewGame={resetGame} />
-
     </ScrollView>
   );
 }
@@ -515,6 +524,8 @@ const styles = StyleSheet.create({
   profileLabel: { color: '#9EAFA5', fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
   profileWeaknesses: { color: '#C5D0C9', fontSize: 12, lineHeight: 18 },
   aiError: { width: '100%', maxWidth: 440, color: '#FFD8CF', backgroundColor: '#321B17', borderWidth: 1, borderColor: '#A84737', borderRadius: 12, borderCurve: 'continuous', padding: 12, fontSize: 13 },
+  privacyFooterLink: { minHeight: 44, paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
+  privacyFooterText: { color: '#9EAFA5', fontSize: 12, fontWeight: '700', textDecorationLine: 'underline' },
 });
 
 

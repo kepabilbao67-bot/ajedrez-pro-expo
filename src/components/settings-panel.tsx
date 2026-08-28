@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
 import { BOARD_THEMES } from '@/board-themes/board-themes';
 import { PIECE_SETS } from '@/board-themes/piece-sets';
 import type { VisualPreferences } from '@/theme/visual-preferences';
@@ -13,6 +14,7 @@ export interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ expanded, onToggle, visualPreferences, onUpdatePreferences }: SettingsPanelProps) {
+  const router = useRouter();
   const [legalVisible, setLegalVisible] = useState(false);
 
   return (
@@ -51,8 +53,16 @@ export function SettingsPanel({ expanded, onToggle, visualPreferences, onUpdateP
             <Text selectable style={styles.settingsLabel}>Sonidos</Text>
             <Text selectable style={styles.soundValue}>{visualPreferences.soundsEnabled ? 'Activados' : 'Desactivados'}</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" onPress={() => setLegalVisible(true)} style={styles.legalButton}>
-            <Text style={styles.legalText}>Privacidad y Licencias</Text>
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel="Abrir política de privacidad"
+            onPress={() => router.push('/privacy' as never)}
+            style={({ pressed }) => [styles.legalButton, pressed && styles.pressed]}
+          >
+            <Text style={styles.legalText}>Política de Privacidad</Text>
+          </Pressable>
+          <Pressable accessibilityRole="button" onPress={() => setLegalVisible(true)} style={styles.licensesButton}>
+            <Text style={styles.licensesText}>Licencias de Código Abierto</Text>
           </Pressable>
         </Animated.View>
       ) : null}
@@ -104,8 +114,10 @@ const styles = StyleSheet.create({
   soundRow: { minHeight: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, borderRadius: 11, borderCurve: 'continuous', backgroundColor: '#22362C' },
   soundValue: { color: '#F6E6BD', fontSize: 12, fontWeight: '900' },
   pressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
-  legalButton: { minHeight: 42, alignItems: 'center', justifyContent: 'center', marginTop: 8, borderRadius: 11, backgroundColor: '#1B3025', borderWidth: 1, borderColor: '#294235' },
-  legalText: { color: '#D6E0DA', fontSize: 12, fontWeight: '700' },
+  legalButton: { minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: 8, borderRadius: 11, backgroundColor: '#1B3025', borderWidth: 1, borderColor: '#294235' },
+  legalText: { color: '#F6E6BD', fontSize: 13, fontWeight: '800' },
+  licensesButton: { minHeight: 40, alignItems: 'center', justifyContent: 'center', marginTop: 4, borderRadius: 11, backgroundColor: '#16241C' },
+  licensesText: { color: '#9EAFA5', fontSize: 12, fontWeight: '600' },
   modalContainer: { flex: 1, backgroundColor: '#09130f', padding: 24, paddingTop: 48 },
   modalTitle: { color: '#F6E6BD', fontSize: 24, fontWeight: '900', marginBottom: 16 },
   modalScroll: { flex: 1 },
