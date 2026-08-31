@@ -17,6 +17,7 @@ export interface UsePlayerProgressResult {
   readonly recordCompletedGame: (result: ProfileGameResult, checkmate: boolean, coachReport: GameAnalysis | null) => void;
   readonly recordHint: () => void;
   readonly recordAnalysis: (report: GameAnalysis) => void;
+  readonly recordExerciseCompleted: () => void;
   readonly reloadProgress: () => void;
 }
 
@@ -62,6 +63,10 @@ export function usePlayerProgress(): UsePlayerProgressResult {
     setGamification(xpServiceRef.current!.recordAnalysis());
   }, []);
 
+  const recordExerciseCompleted = useCallback(() => {
+    setGamification(xpServiceRef.current!.recordExercise());
+  }, []);
+
   const playerLevel = useMemo(() => levelForXp(gamification.xp), [gamification.xp]);
 
   const nextLevelXp = useMemo(
@@ -89,6 +94,7 @@ export function usePlayerProgress(): UsePlayerProgressResult {
     recordCompletedGame,
     recordHint,
     recordAnalysis,
+    recordExerciseCompleted,
     reloadProgress,
   };
 }

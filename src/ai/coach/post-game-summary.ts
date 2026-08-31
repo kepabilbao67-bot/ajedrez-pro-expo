@@ -1,19 +1,40 @@
 import type { GameAnalysis } from './coach-types';
 
-export interface PostGameSummary { bestMove: string; worstError: string; learning: string; accuracy: number; totalMoves: number; blunders: number; }
+export interface PostGameSummary {
+  bestMove: string;
+  worstError: string;
+  learning: string;
+  accuracy: number;
+  totalMoves: number;
+  blunders: number;
+  inaccuracies: number;
+  bestMovesCount: number;
+  brilliantMovesCount: number;
+}
+
 export function createPostGameSummary(analysis: GameAnalysis, totalMoves: number = 20): PostGameSummary {
   const critical = analysis.criticalMoment;
-  const blunders = analysis.mistakes.length;
+  const blunders = analysis.mistakes.filter((m) => m.severity === 'blunder').length || analysis.mistakes.length;
   const inaccuracies = analysis.inaccuracies.length;
   // A simple heuristic for accuracy: 100 - (blunders * 10) - (inaccuracies * 3)
-  const accuracy = Math.max(10, 100 - (blunders * 10) - (inaccuracies * 3));
-  
+  const accuracy = Math.max(10, Math.min(100, 100 - (blunders * 10) - (inaccuracies * 3)));
+
+  const bestMovesCount = Math.max(0, totalMoves - blunders - inaccuracies);
+  const brilliantMovesCount = critical && Math.abs(critical.evaluationChange) > 2 ? 1 : 0;
+
   return {
-    bestMove: analysis.missedOpportunities[0]?.recommendedMove ? 'Había una jugada más precisa disponible.' : 'Tus jugadas mantuvieron el plan de la posición.',
+    bestMove: analysis.missedOpportunities[0]?.recommendedMove
+      ? 'Había una jugada más precisa disponible.'
+      : 'Tus jugadas mantuvieron el plan de la posición.',
     worstError: critical ? critical.explanation : 'No se detectó un error crítico.',
-    learning: critical ? 'Antes de atacar, desarrolla tus piezas y revisa amenazas rivales.' : 'Mantén la coordinación de tus piezas y consolida tus ventajas.',
+    learning: critical
+      ? 'Antes de atacar, desarrolla tus piezas y revisa amenazas rivales.'
+      : 'Mantén la coordinación de tus piezas y consolida tus ventajas.',
     accuracy,
     totalMoves,
     blunders,
+    inaccuracies,
+    bestMovesCount,
+    brilliantMovesCount,
   };
 }
