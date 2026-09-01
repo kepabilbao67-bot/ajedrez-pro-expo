@@ -22,6 +22,7 @@ import {
 } from '@/services/openingBook';
 import { useVisualPreferences } from '@/hooks/use-visual-preferences';
 import { useHaptics } from '@/hooks/use-haptics';
+import { APP_COLORS } from '@/theme/colors';
 
 export function OpeningsScreen() {
   const router = useRouter();
@@ -33,12 +34,10 @@ export function OpeningsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFamily, setSelectedFamily] = useState<OpeningFamily | 'all'>('all');
 
-  // Compute position for the selected opening
   const buildOpeningPosition = (moves: readonly string[]): { game: ChessGame; position: Position } => {
     const game = new ChessGame();
     for (const moveSan of moves) {
       const legal = game.legalMoves();
-      // Match by SAN string simulation
       for (const m of legal) {
         const testGame = new ChessGame(game.fen());
         const record = testGame.move(m);
@@ -53,7 +52,7 @@ export function OpeningsScreen() {
 
   const { position } = buildOpeningPosition(selectedOpening.moves);
 
-  const availableWidth = width - 32;
+  const availableWidth = width - 28;
   const boardSize = Math.min(Math.max(availableWidth, 240), 360);
 
   const filteredOpenings = searchOpenings(
@@ -85,7 +84,7 @@ export function OpeningsScreen() {
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
             placeholder="Buscar por nombre, código ECO (B90, C50...) o variante"
-            placeholderTextColor="#6D8276"
+            placeholderTextColor={APP_COLORS.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
             style={styles.searchInput}
@@ -223,8 +222,8 @@ export function OpeningsScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#09130F' },
-  container: { padding: 16, alignItems: 'center', gap: 14 },
+  root: { flex: 1, backgroundColor: APP_COLORS.background },
+  container: { padding: 14, alignItems: 'center', gap: 14 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -236,33 +235,33 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  backButtonText: { color: '#00E5B4', fontSize: 13, fontWeight: '800' },
-  headerTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '900' },
+  backButtonText: { color: APP_COLORS.blueElectric, fontSize: 13, fontWeight: '800' },
+  headerTitle: { color: APP_COLORS.goldBright, fontSize: 18, fontWeight: '900' },
   ecoBadge: {
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#00E5B4',
+    borderColor: APP_COLORS.borderGold,
   },
-  ecoBadgeText: { color: '#00E5B4', fontSize: 12, fontWeight: '900' },
+  ecoBadgeText: { color: APP_COLORS.goldBright, fontSize: 12, fontWeight: '900' },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     width: '100%',
     maxWidth: 440,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
   searchIcon: { fontSize: 14 },
   searchInput: {
@@ -280,24 +279,24 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   filterChip: {
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  filterChipActive: { backgroundColor: '#00E5B4', borderColor: '#00E5B4' },
-  filterChipText: { color: '#9EAFA5', fontSize: 11, fontWeight: '800' },
-  filterChipTextActive: { color: '#09130F' },
+  filterChipActive: { backgroundColor: APP_COLORS.blueElectric, borderColor: APP_COLORS.blueElectric },
+  filterChipText: { color: APP_COLORS.textMuted, fontSize: 11, fontWeight: '800' },
+  filterChipTextActive: { color: '#070B0E', fontWeight: '900' },
   activeCard: {
     width: '100%',
     maxWidth: 440,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#294235',
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
     gap: 12,
   },
   openingHeaderRow: {
@@ -306,75 +305,81 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   openingTitleCol: { flex: 1, paddingRight: 8 },
-  activeOpeningTitle: { color: '#FFFFFF', fontSize: 17, fontWeight: '900' },
-  activeOpeningFamily: { color: '#00E5B4', fontSize: 11, fontWeight: '700', marginTop: 2 },
+  activeOpeningTitle: { color: APP_COLORS.goldBright, fontSize: 17, fontWeight: '900' },
+  activeOpeningFamily: { color: APP_COLORS.blueElectric, fontSize: 11, fontWeight: '800', marginTop: 2 },
   ecoCodeBox: {
-    backgroundColor: 'rgba(0, 229, 180, 0.15)',
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: APP_COLORS.borderGold,
   },
-  ecoCodeText: { color: '#00E5B4', fontSize: 13, fontWeight: '900' },
+  ecoCodeText: { color: APP_COLORS.goldBright, fontSize: 13, fontWeight: '900' },
   boardWrapper: { alignItems: 'center', justifyContent: 'center', marginVertical: 4 },
   movesSequenceBox: { gap: 6 },
-  movesSequenceTitle: { color: '#9EAFA5', fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+  movesSequenceTitle: { color: APP_COLORS.textMuted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
   movesChipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   moveChip: {
-    backgroundColor: '#1B3025',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  moveChipText: { color: '#F6E6BD', fontSize: 11, fontWeight: '800' },
-  openingDescription: { color: '#C5D0C9', fontSize: 13, lineHeight: 19 },
+  moveChipText: { color: APP_COLORS.goldBright, fontSize: 11, fontWeight: '800' },
+  openingDescription: { color: APP_COLORS.textSecondary, fontSize: 13, lineHeight: 19 },
   strategicIdeasBox: {
-    backgroundColor: '#111E18',
+    backgroundColor: APP_COLORS.surfaceStrong,
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#1E3529',
+    borderColor: APP_COLORS.border,
     gap: 6,
   },
-  strategicIdeasTitle: { color: '#F5C451', fontSize: 12, fontWeight: '800' },
+  strategicIdeasTitle: { color: APP_COLORS.goldBright, fontSize: 12, fontWeight: '800' },
   ideaItem: { flexDirection: 'row', gap: 6, alignItems: 'flex-start' },
-  ideaDot: { color: '#00E5B4', fontSize: 14, lineHeight: 16 },
-  ideaText: { color: '#C5D0C9', fontSize: 12, lineHeight: 17, flex: 1 },
+  ideaDot: { color: APP_COLORS.blueElectric, fontSize: 14, lineHeight: 16 },
+  ideaText: { color: APP_COLORS.textSecondary, fontSize: 12, lineHeight: 17, flex: 1 },
   keySquaresRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  keySquaresTitle: { color: '#9EAFA5', fontSize: 11, fontWeight: '700' },
+  keySquaresTitle: { color: APP_COLORS.textMuted, fontSize: 11, fontWeight: '700' },
   keySquareBadge: {
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: APP_COLORS.borderBlue,
   },
-  keySquareBadgeText: { color: '#00E5B4', fontSize: 10, fontWeight: '900' },
+  keySquareBadgeText: { color: APP_COLORS.blueElectric, fontSize: 10, fontWeight: '900' },
   listSection: { width: '100%', maxWidth: 440, gap: 10 },
-  listSectionTitle: { color: '#FFFFFF', fontSize: 14, fontWeight: '900' },
+  listSectionTitle: { color: APP_COLORS.goldBright, fontSize: 14, fontWeight: '900' },
   openingsList: { gap: 8 },
   openingListItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     padding: 12,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  openingListItemActive: { borderColor: '#00E5B4', backgroundColor: '#183025' },
+  openingListItemActive: { borderColor: APP_COLORS.goldPrimary, backgroundColor: 'rgba(229, 184, 105, 0.1)' },
   listItemLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
   itemEcoBadge: {
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: APP_COLORS.borderGold,
   },
-  itemEcoText: { color: '#00E5B4', fontSize: 11, fontWeight: '900' },
+  itemEcoText: { color: APP_COLORS.goldBright, fontSize: 11, fontWeight: '900' },
   itemInfo: { flex: 1, gap: 2 },
   itemTitle: { color: '#FFFFFF', fontSize: 13, fontWeight: '800' },
-  itemMoves: { color: '#9EAFA5', fontSize: 11 },
-  itemArrow: { color: '#00E5B4', fontSize: 14, fontWeight: '900' },
+  itemMoves: { color: APP_COLORS.textSecondary, fontSize: 11 },
+  itemArrow: { color: APP_COLORS.blueElectric, fontSize: 14, fontWeight: '900' },
   pressed: { opacity: 0.8 },
 });

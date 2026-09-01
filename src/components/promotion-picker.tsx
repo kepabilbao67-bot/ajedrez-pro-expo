@@ -4,6 +4,7 @@ import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 
 import { ChessPieceView, type PieceSetId } from '@/board-themes/piece-sets';
 import type { Color, Piece, PromotionPiece } from '@/chess';
+import { APP_COLORS } from '@/theme/colors';
 
 const PROMOTION_OPTIONS: readonly { value: PromotionPiece; label: string }[] = [
   { value: 'q', label: 'Dama' },
@@ -42,13 +43,13 @@ export function PromotionPicker({
           style={styles.card}
         >
           <Text selectable style={styles.eyebrow}>
-            PROMOCIÓN
+            CORONACIÓN DE PEÓN
           </Text>
           <Text selectable style={styles.title}>
-            Elige una pieza
+            Elige una Pieza
           </Text>
           <Text selectable style={styles.subtitle}>
-            La elección se aplicará inmediatamente con tu estilo visual.
+            La coronación transformará tu peón en la pieza seleccionada.
           </Text>
           <View style={styles.options}>
             {PROMOTION_OPTIONS.map((option, index) => {
@@ -105,7 +106,7 @@ export function PromotionPicker({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(5, 12, 9, 0.84)',
+    backgroundColor: 'rgba(4, 6, 8, 0.88)',
     justifyContent: 'center',
     padding: 20,
   },
@@ -113,31 +114,31 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 420,
     alignSelf: 'center',
-    backgroundColor: '#F8F4EA',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 24,
     borderCurve: 'continuous',
     padding: 20,
     gap: 12,
-    borderWidth: 1,
-    borderColor: '#D6C397',
-    boxShadow: '0 16px 40px rgba(0, 0, 0, 0.4)',
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
+    boxShadow: '0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(229, 184, 105, 0.2)',
   },
   eyebrow: {
-    color: '#8A6B2E',
+    color: APP_COLORS.blueElectric,
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 1.8,
     textAlign: 'center',
   },
   title: {
-    color: '#17231E',
-    fontSize: 25,
+    color: APP_COLORS.goldBright,
+    fontSize: 24,
     fontWeight: '900',
     textAlign: 'center',
   },
   subtitle: {
-    color: '#526158',
-    fontSize: 14,
+    color: APP_COLORS.textSecondary,
+    fontSize: 13,
     textAlign: 'center',
     paddingBottom: 4,
   },
@@ -152,18 +153,18 @@ const styles = StyleSheet.create({
   },
   option: {
     minHeight: 110,
-    borderRadius: 17,
+    borderRadius: 18,
     borderCurve: 'continuous',
-    backgroundColor: '#E8DCC4',
+    backgroundColor: APP_COLORS.surfaceStrong,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#B9934A',
+    borderColor: APP_COLORS.border,
     padding: 10,
     gap: 6,
   },
   pressed: {
-    opacity: 0.7,
+    opacity: 0.75,
     transform: [{ scale: 0.97 }],
   },
   pieceContainer: {
@@ -173,20 +174,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
-    color: '#17231E',
+    color: APP_COLORS.goldBright,
     fontSize: 14,
     fontWeight: '800',
   },
   cancel: {
-    minHeight: 50,
+    minHeight: 46,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
     borderCurve: 'continuous',
   },
   cancelText: {
-    color: '#315C4A',
-    fontSize: 16,
-    fontWeight: '900',
+    color: APP_COLORS.textMuted,
+    fontSize: 14,
+    fontWeight: '800',
   },
 });

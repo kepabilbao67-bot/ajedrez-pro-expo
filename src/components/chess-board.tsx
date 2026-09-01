@@ -70,11 +70,11 @@ function MovingPiece({
 
   useEffect(() => {
     progress.value = 0;
-    progress.value = withTiming(1, { duration: 210 });
+    progress.value = withTiming(1, { duration: 190 });
   }, [move, progress]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 0.88, 1], [1, 1, 0]),
+    opacity: interpolate(progress.value, [0, 0.9, 1], [1, 1, 0]),
     transform: [
       { translateX: interpolate(progress.value, [0, 1], [0, deltaX]) },
       { translateY: interpolate(progress.value, [0, 1], [0, deltaY]) },
@@ -96,7 +96,7 @@ function MovingPiece({
         animatedStyle,
       ]}
     >
-      <ChessPieceView piece={piece} pieceSetId={pieceSet.id} size={squareSize * 0.86} />
+      <ChessPieceView piece={piece} pieceSetId={pieceSet.id} size={squareSize * 0.88} />
     </Animated.View>
   );
 }
@@ -126,175 +126,225 @@ export function ChessBoard({
       accessibilityLabel={`Tablero de ajedrez tema ${boardTheme.name}`}
       accessibilityRole="summary"
       style={[
-        styles.frame,
+        styles.outerBevel,
         {
-          backgroundColor: boardTheme.frame,
-          width: size + 6,
-          height: size + 6,
+          borderColor: boardTheme.frame,
+          width: size + 10,
+          height: size + 10,
         },
       ]}
     >
-      <View style={[styles.board, { width: size, height: size }]}>
-        {squares.map((square, displayIndex) => {
-          const piece = position.board[square];
-          const move = legalTargets.get(square);
-          const algebraic = squareToAlgebraic(square);
-          const displayRow = Math.floor(displayIndex / 8);
-          const displayColumn = displayIndex % 8;
-          const showFile = displayRow === 7;
-          const showRank = displayColumn === 0;
-          const isLight = (Math.floor(square / 8) + (square % 8)) % 2 === 0;
-          const isLastMove = lastMove?.from === square || lastMove?.to === square;
-          const isCaptureDestination = lastMove?.capture === true && lastMove.to === square;
-          const pieceLabel = piece
-            ? `${PIECE_NAMES[typeOf(piece)]} ${colorOf(piece) === 'w' ? 'blanco' : 'negro'}`
-            : 'vacía';
+      <View
+        style={[
+          styles.frame,
+          {
+            backgroundColor: '#070B0E',
+            borderColor: 'rgba(212, 175, 55, 0.4)',
+            width: size + 4,
+            height: size + 4,
+          },
+        ]}
+      >
+        <View style={[styles.board, { width: size, height: size }]}>
+          {squares.map((square, displayIndex) => {
+            const piece = position.board[square];
+            const move = legalTargets.get(square);
+            const algebraic = squareToAlgebraic(square);
+            const displayRow = Math.floor(displayIndex / 8);
+            const displayColumn = displayIndex % 8;
+            const showFile = displayRow === 7;
+            const showRank = displayColumn === 0;
+            const isLight = (Math.floor(square / 8) + (square % 8)) % 2 === 0;
+            const isLastMove = lastMove?.from === square || lastMove?.to === square;
+            const isCaptureDestination = lastMove?.capture === true && lastMove.to === square;
+            const pieceLabel = piece
+              ? `${PIECE_NAMES[typeOf(piece)]} ${colorOf(piece) === 'w' ? 'blanco' : 'negro'}`
+              : 'vacía';
 
-          return (
-            <Pressable
-              key={square}
-              accessibilityLabel={`${algebraic}, ${pieceLabel}${move ? ', movimiento legal' : ''}`}
-              accessibilityRole="button"
-              accessibilityState={{ disabled, selected: selected === square }}
-              disabled={disabled}
-              onPress={() => {
-                if (!disabled) {
-                  if (move) {
-                    Haptics.impactAsync(
-                      move.capture
-                        ? Haptics.ImpactFeedbackStyle.Medium
-                        : Haptics.ImpactFeedbackStyle.Light
-                    );
-                  } else if (piece) {
-                    Haptics.selectionAsync();
+            return (
+              <Pressable
+                key={square}
+                accessibilityLabel={`${algebraic}, ${pieceLabel}${move ? ', movimiento legal' : ''}`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled, selected: selected === square }}
+                disabled={disabled}
+                onPress={() => {
+                  if (!disabled) {
+                    if (move) {
+                      Haptics.impactAsync(
+                        move.capture
+                          ? Haptics.ImpactFeedbackStyle.Medium
+                          : Haptics.ImpactFeedbackStyle.Light
+                      );
+                    } else if (piece) {
+                      Haptics.selectionAsync();
+                    }
+                    onSquarePress(square);
                   }
-                  onSquarePress(square);
-                }
-              }}
-              style={({ pressed }) => [
-                styles.square,
-                {
-                  width: squareSize,
-                  height: squareSize,
-                  backgroundColor: isLight ? boardTheme.lightSquare : boardTheme.darkSquare,
-                },
-                isLastMove && { backgroundColor: boardTheme.lastMove },
-                square === checkedKing && styles.checkedKing,
-                selected === square && { borderWidth: 4, borderColor: boardTheme.selected },
-                pressed && !disabled && styles.pressed,
-              ]}
-            >
-              {isCaptureDestination ? (
-                <Animated.View entering={FadeIn.duration(180)} style={styles.captureFlash} />
-              ) : null}
-              {piece ? (
-                <Animated.View
-                  key={`${piece}-${square}`}
-                  entering={lastMove?.to === square ? ZoomIn.duration(180) : undefined}
-                  accessibilityElementsHidden
-                  style={styles.pieceContainer}
-                >
-                  <ChessPieceView piece={piece} pieceSetId={pieceSet.id} size={squareSize * 0.86} />
-                </Animated.View>
-              ) : null}
-              {move ? (
-                move.capture ? (
+                }}
+                style={({ pressed }) => [
+                  styles.square,
+                  {
+                    width: squareSize,
+                    height: squareSize,
+                    backgroundColor: isLight ? boardTheme.lightSquare : boardTheme.darkSquare,
+                  },
+                  isLastMove && {
+                    backgroundColor: isLight ? '#1B4965' : '#0F2B48',
+                  },
+                  square === checkedKing && styles.checkedKing,
+                  selected === square && styles.selectedSquare,
+                  pressed && !disabled && styles.pressed,
+                ]}
+              >
+                {/* Last Move Glow overlay */}
+                {isLastMove ? (
+                  <View style={styles.lastMoveGlow} />
+                ) : null}
+
+                {/* Capture Flash animation */}
+                {isCaptureDestination ? (
+                  <Animated.View entering={FadeIn.duration(180)} style={styles.captureFlash} />
+                ) : null}
+
+                {/* Piece Rendering */}
+                {piece ? (
                   <Animated.View
-                    entering={ZoomIn.duration(140)}
+                    key={`${piece}-${square}`}
+                    entering={lastMove?.to === square ? ZoomIn.duration(160) : undefined}
+                    accessibilityElementsHidden
+                    style={styles.pieceContainer}
+                  >
+                    <ChessPieceView piece={piece} pieceSetId={pieceSet.id} size={squareSize * 0.88} />
+                  </Animated.View>
+                ) : null}
+
+                {/* Legal Move Indicators */}
+                {move ? (
+                  move.capture ? (
+                    <Animated.View
+                      entering={ZoomIn.duration(140)}
+                      accessibilityElementsHidden
+                      style={[
+                        styles.captureTarget,
+                        { width: squareSize - 6, height: squareSize - 6 },
+                      ]}
+                    />
+                  ) : (
+                    <Animated.View
+                      entering={ZoomIn.duration(140)}
+                      accessibilityElementsHidden
+                      style={[
+                        styles.moveTarget,
+                        {
+                          backgroundColor: '#00D2FF',
+                          width: Math.max(10, squareSize * 0.26),
+                          height: Math.max(10, squareSize * 0.26),
+                        },
+                      ]}
+                    />
+                  )
+                ) : null}
+
+                {/* Coordinates */}
+                {showRank ? (
+                  <Text
                     accessibilityElementsHidden
                     style={[
-                      styles.captureTarget,
-                      { width: squareSize - 8, height: squareSize - 8 },
-                    ]}
-                  />
-                ) : (
-                  <Animated.View
-                    entering={ZoomIn.duration(140)}
-                    accessibilityElementsHidden
-                    style={[
-                      styles.moveTarget,
+                      styles.coordinate,
+                      styles.rank,
                       {
-                        backgroundColor: boardTheme.legalMove,
-                        width: Math.max(10, squareSize * 0.25),
-                        height: Math.max(10, squareSize * 0.25),
+                        color: isLight ? boardTheme.coordinateLight : boardTheme.coordinateDark,
                       },
                     ]}
-                  />
-                )
-              ) : null}
-              {showRank ? (
-                <Text
-                  accessibilityElementsHidden
-                  style={[
-                    styles.coordinate,
-                    styles.rank,
-                    {
-                      color: isLight ? boardTheme.coordinateLight : boardTheme.coordinateDark,
-                    },
-                  ]}
-                >
-                  {algebraic[1]}
-                </Text>
-              ) : null}
-              {showFile ? (
-                <Text
-                  accessibilityElementsHidden
-                  style={[
-                    styles.coordinate,
-                    styles.file,
-                    {
-                      color: isLight ? boardTheme.coordinateLight : boardTheme.coordinateDark,
-                    },
-                  ]}
-                >
-                  {algebraic[0]}
-                </Text>
-              ) : null}
-            </Pressable>
-          );
-        })}
-        {lastMove && position.board[lastMove.to] ? (
-          <MovingPiece
-            key={`${lastMove.from}-${lastMove.to}-${position.fullmoveNumber}-${position.turn}`}
-            move={lastMove}
-            piece={position.board[lastMove.to]!}
-            size={size}
-            flipped={flipped}
-            pieceSet={pieceSet}
-          />
-        ) : null}
+                  >
+                    {algebraic[1]}
+                  </Text>
+                ) : null}
+                {showFile ? (
+                  <Text
+                    accessibilityElementsHidden
+                    style={[
+                      styles.coordinate,
+                      styles.file,
+                      {
+                        color: isLight ? boardTheme.coordinateLight : boardTheme.coordinateDark,
+                      },
+                    ]}
+                  >
+                    {algebraic[0]}
+                  </Text>
+                ) : null}
+              </Pressable>
+            );
+          })}
+
+          {lastMove && position.board[lastMove.to] ? (
+            <MovingPiece
+              key={`${lastMove.from}-${lastMove.to}-${position.fullmoveNumber}-${position.turn}`}
+              move={lastMove}
+              piece={position.board[lastMove.to]!}
+              size={size}
+              flipped={flipped}
+              pieceSet={pieceSet}
+            />
+          ) : null}
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  outerBevel: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 20,
+    borderCurve: 'continuous',
+    borderWidth: 2,
+    backgroundColor: '#0B1117',
+    boxShadow: '0 14px 38px rgba(0, 0, 0, 0.65), 0 0 16px rgba(212, 175, 55, 0.25)',
+  },
   frame: {
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 16,
     borderCurve: 'continuous',
     overflow: 'hidden',
-    boxShadow: '0 10px 28px rgba(0, 0, 0, 0.35)',
+    borderWidth: 1,
   },
   board: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     overflow: 'hidden',
-    borderRadius: 13,
+    borderRadius: 14,
     borderCurve: 'continuous',
   },
   square: {
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+  },
+  selectedSquare: {
+    borderWidth: 3,
+    borderColor: '#00E5FF',
+    boxShadow: 'inset 0 0 12px rgba(0, 229, 255, 0.45)',
+  },
+  lastMoveGlow: {
+    position: 'absolute',
+    inset: 0,
+    borderWidth: 1.5,
+    borderColor: 'rgba(0, 210, 255, 0.55)',
+    backgroundColor: 'rgba(0, 210, 255, 0.12)',
   },
   checkedKing: {
-    backgroundColor: '#C94D3B',
-    borderWidth: 3,
-    borderColor: '#FFD0C7',
+    backgroundColor: '#991B1B',
+    borderWidth: 2.5,
+    borderColor: '#FCA5A5',
+    boxShadow: 'inset 0 0 16px rgba(239, 68, 68, 0.75)',
   },
   pressed: {
-    opacity: 0.78,
+    opacity: 0.8,
   },
   pieceContainer: {
     zIndex: 2,
@@ -312,26 +362,31 @@ const styles = StyleSheet.create({
     zIndex: 3,
     borderRadius: 999,
     borderWidth: 2,
-    borderColor: 'rgba(23, 35, 30, 0.75)',
+    borderColor: '#070B0E',
+    boxShadow: '0 0 8px #00D2FF',
   },
   captureTarget: {
     position: 'absolute',
     zIndex: 3,
     borderRadius: 999,
-    borderWidth: 4,
-    borderColor: '#FFE28A',
+    borderWidth: 3.5,
+    borderColor: '#FF3B30',
+    backgroundColor: 'rgba(255, 59, 48, 0.15)',
+    boxShadow: '0 0 10px rgba(255, 59, 48, 0.65)',
   },
   captureFlash: {
     position: 'absolute',
     inset: 0,
     zIndex: 1,
-    backgroundColor: 'rgba(196, 71, 50, 0.46)',
+    backgroundColor: 'rgba(255, 59, 48, 0.38)',
   },
   coordinate: {
     position: 'absolute',
     zIndex: 4,
     fontSize: 10,
     fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+    letterSpacing: 0.2,
   },
   rank: {
     left: 3,

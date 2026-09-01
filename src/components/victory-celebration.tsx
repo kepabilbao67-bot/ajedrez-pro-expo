@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+import { APP_COLORS } from '@/theme/colors';
 
 function Particle({ index }: { index: number }) {
   const [randomData] = useState(() => ({
@@ -8,7 +9,7 @@ function Particle({ index }: { index: number }) {
     delayY: Math.random() * 300,
     delayOp: Math.random() * 300,
     targetY: -150 - Math.random() * 100,
-    scale: Math.random() * 0.5 + 0.5
+    scale: Math.random() * 0.5 + 0.5,
   }));
 
   const pX = useSharedValue(randomData.x);
@@ -36,13 +37,19 @@ function Particle({ index }: { index: number }) {
       transform: [
         { translateX: pX.value },
         { translateY: pY.value },
-        { scale: randomData.scale }
-      ]
+        { scale: randomData.scale },
+      ],
     };
   });
 
   return (
-    <Animated.View style={[styles.particle, pStyle, { backgroundColor: ['#00E5B4', '#D6A943', '#F7CE63', '#C44732'][index % 4] }]} />
+    <Animated.View
+      style={[
+        styles.particle,
+        pStyle,
+        { backgroundColor: [APP_COLORS.blueElectric, APP_COLORS.goldPrimary, APP_COLORS.goldBright, '#00E676'][index % 4] },
+      ]}
+    />
   );
 }
 
@@ -65,13 +72,12 @@ export function VictoryCelebration() {
       opacity: opacity.value,
       transform: [
         { scale: scale.value },
-        { translateY: translateY.value }
-      ]
+        { translateY: translateY.value },
+      ],
     };
   });
 
-  // Confetti particles
-  const particles = Array.from({ length: 12 }).map((_, i) => (
+  const particles = Array.from({ length: 14 }).map((_, i) => (
     <Particle key={i} index={i} />
   ));
 
@@ -79,14 +85,44 @@ export function VictoryCelebration() {
     <Animated.View style={[styles.container, animatedStyle]}>
       {particles}
       <Text style={styles.title}>¡JAQUE MATE!</Text>
-      <Text style={styles.subtitle}>¡Has ganado la partida!</Text>
+      <Text style={styles.subtitle}>👑 ¡Victoria magistral!</Text>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { width: '100%', maxWidth: 440, alignItems: 'center', justifyContent: 'center', padding: 20, borderRadius: 20, backgroundColor: '#3B2D10', borderWidth: 2, borderColor: '#D6A943', marginVertical: 10, shadowColor: '#D6A943', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.5, shadowRadius: 12, elevation: 8, overflow: 'visible' },
-  title: { color: '#F7CE63', fontSize: 32, fontWeight: '900', letterSpacing: 2, textShadowColor: 'rgba(0, 0, 0, 0.5)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 },
-  subtitle: { color: '#F6E6BD', fontSize: 16, fontWeight: '700', marginTop: 4 },
-  particle: { position: 'absolute', width: 10, height: 10, borderRadius: 5, zIndex: -1 },
+  container: {
+    width: '100%',
+    maxWidth: 440,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    borderRadius: 22,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 2,
+    borderColor: APP_COLORS.borderGold,
+    marginVertical: 10,
+    boxShadow: '0 8px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(229, 184, 105, 0.4)',
+    overflow: 'visible',
+  },
+  title: {
+    color: APP_COLORS.goldBright,
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: 2,
+  },
+  subtitle: {
+    color: APP_COLORS.blueElectric,
+    fontSize: 16,
+    fontWeight: '800',
+    marginTop: 4,
+  },
+  particle: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    zIndex: -1,
+  },
 });

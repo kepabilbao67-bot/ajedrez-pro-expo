@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { APP_COLORS } from '@/theme/colors';
 
 export interface CoachPanelProps {
   readonly coachMessage: string | null;
@@ -27,33 +28,41 @@ export function CoachPanel({
 
   return (
     <View style={styles.container}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ disabled: isHintDisabled }}
-        disabled={isHintDisabled}
-        onPress={onRequestHint}
-        style={({ pressed }) => [styles.coachButton, isHintDisabled && styles.disabledButton, pressed && styles.pressed]}
-      >
-        <Text style={styles.coachButtonText}>{coachLoading ? 'Analizando…' : `Pista · nivel ${hintLevel}`}</Text>
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ disabled: isAnalyzeDisabled }}
-        disabled={isAnalyzeDisabled}
-        onPress={onAnalyzeGame}
-        style={({ pressed }) => [styles.coachButton, isAnalyzeDisabled && styles.disabledButton, pressed && styles.pressed]}
-      >
-        <Text style={styles.coachButtonText}>Analizar partida</Text>
-      </Pressable>
+      <View style={styles.buttonsRow}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isHintDisabled }}
+          disabled={isHintDisabled}
+          onPress={onRequestHint}
+          style={({ pressed }) => [styles.coachButton, isHintDisabled && styles.disabledButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.coachButtonText}>{coachLoading ? 'Analizando…' : `💡 Pista · Nivel ${hintLevel}`}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ disabled: isAnalyzeDisabled }}
+          disabled={isAnalyzeDisabled}
+          onPress={onAnalyzeGame}
+          style={({ pressed }) => [styles.coachButtonAnalyze, isAnalyzeDisabled && styles.disabledButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.coachButtonAnalyzeText}>📊 Analizar</Text>
+        </Pressable>
+      </View>
 
       {coachMessage ? (
         <Animated.View entering={FadeIn.duration(180)} style={styles.coachCard}>
-          <Text selectable style={styles.coachTitle}>Profesor IA</Text>
+          <View style={styles.coachHeader}>
+            <Text style={styles.coachIcon}>🧠</Text>
+            <Text style={styles.coachTitle}>Profesor Táctico IA</Text>
+          </View>
           <Text selectable style={styles.coachText}>{coachMessage}</Text>
         </Animated.View>
       ) : (
         <View style={styles.coachCard}>
-          <Text selectable style={styles.coachTitle}>Profesor IA</Text>
+          <View style={styles.coachHeader}>
+            <Text style={styles.coachIcon}>🧠</Text>
+            <Text style={styles.coachTitle}>Profesor Táctico IA</Text>
+          </View>
           <Text selectable style={styles.coachText}>{contextualMessage}</Text>
         </View>
       )}
@@ -63,29 +72,54 @@ export function CoachPanel({
 
 const styles = StyleSheet.create({
   container: { width: '100%', maxWidth: 440, gap: 8 },
+  buttonsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   coachButton: {
-    minHeight: 48,
+    flex: 1.2,
+    minHeight: 46,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 14,
     borderCurve: 'continuous',
-    backgroundColor: '#22362C',
+    backgroundColor: APP_COLORS.surface,
     borderWidth: 1,
-    borderColor: '#3B5A49',
+    borderColor: APP_COLORS.borderBlue,
   },
-  coachButtonText: { color: '#F6E6BD', fontSize: 14, fontWeight: '800' },
-  disabledButton: { opacity: 0.5 },
+  coachButtonText: { color: APP_COLORS.blueElectric, fontSize: 13, fontWeight: '800' },
+  coachButtonAnalyze: {
+    flex: 0.8,
+    minHeight: 46,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 1,
+    borderColor: APP_COLORS.borderGold,
+  },
+  coachButtonAnalyzeText: { color: APP_COLORS.goldBright, fontSize: 13, fontWeight: '800' },
+  disabledButton: { opacity: 0.45 },
   pressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
   coachCard: {
     width: '100%',
-    gap: 5,
+    gap: 6,
     padding: 14,
     borderRadius: 16,
     borderCurve: 'continuous',
-    backgroundColor: '#1B3025',
+    backgroundColor: APP_COLORS.surface,
     borderWidth: 1,
-    borderColor: '#3B5A49',
+    borderColor: APP_COLORS.border,
   },
-  coachTitle: { color: '#F5C451', fontSize: 13, fontWeight: '900' },
-  coachText: { color: '#E4ECE7', fontSize: 14, lineHeight: 20 },
+  coachHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  coachIcon: {
+    fontSize: 16,
+  },
+  coachTitle: { color: APP_COLORS.goldBright, fontSize: 13, fontWeight: '900' },
+  coachText: { color: APP_COLORS.textSecondary, fontSize: 13, lineHeight: 19 },
 });

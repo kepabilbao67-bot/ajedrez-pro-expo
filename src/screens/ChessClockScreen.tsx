@@ -19,6 +19,7 @@ import {
 } from '@/types/chess-clock-types';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useAudioSfx } from '@/hooks/use-audio-sfx';
+import { APP_COLORS } from '@/theme/colors';
 
 export function ChessClockScreen() {
   const router = useRouter();
@@ -132,9 +133,7 @@ export function ChessClockScreen() {
     const incrementMs = preset.incrementSeconds * 1000;
 
     if (status === 'ready') {
-      // First tap starts the clock for the opponent
       if (player === 'bottom') {
-        // Bottom (usually White) pressed -> Top (Black) turn starts
         setActivePlayer('top');
         setBottomPlayer((prev) => ({
           ...prev,
@@ -155,7 +154,6 @@ export function ChessClockScreen() {
 
     if (status === 'running') {
       if (player === activePlayer) {
-        // Player completed their move, switch to opponent & add increment
         if (player === 'top') {
           setTopPlayer((prev) => ({
             ...prev,
@@ -181,7 +179,6 @@ export function ChessClockScreen() {
     const secs = totalSeconds % 60;
 
     if (mins < 1 && totalSeconds <= 20) {
-      // Show tenths of second when low on time
       const tenths = Math.floor((ms % 1000) / 100);
       return `${secs}.${tenths}`;
     }
@@ -194,7 +191,7 @@ export function ChessClockScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor="#09130F" />
+      <StatusBar barStyle="light-content" backgroundColor={APP_COLORS.background} />
 
       {/* TOP PLAYER PADDLE (Rotated 180° for opponent) */}
       <Pressable
@@ -359,42 +356,38 @@ export function ChessClockScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#09130F',
+    backgroundColor: APP_COLORS.background,
   },
   playerPaddle: {
     flex: 1,
     margin: 8,
     borderRadius: 24,
     borderCurve: 'continuous',
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderWidth: 2,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   topPaddle: {
-    backgroundColor: '#111E18',
+    backgroundColor: APP_COLORS.surfaceStrong,
   },
   bottomPaddle: {
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
   },
   activePaddle: {
-    backgroundColor: '#1E3A2D',
-    borderColor: '#00E5B4',
-    shadowColor: '#00E5B4',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.35,
-    shadowRadius: 16,
-    elevation: 8,
+    backgroundColor: 'rgba(0, 210, 255, 0.1)',
+    borderColor: APP_COLORS.blueElectric,
+    boxShadow: '0 0 20px rgba(0, 210, 255, 0.4)',
   },
   lowTimePaddle: {
-    borderColor: '#FF8C42',
-    backgroundColor: '#2A1D16',
+    borderColor: APP_COLORS.warning,
+    backgroundColor: 'rgba(245, 196, 81, 0.12)',
   },
   flaggedPaddle: {
-    borderColor: '#FF4D4D',
-    backgroundColor: '#2F1414',
+    borderColor: APP_COLORS.danger,
+    backgroundColor: 'rgba(255, 59, 48, 0.15)',
   },
   paddlePressed: {
     opacity: 0.9,
@@ -418,19 +411,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   playerName: {
-    color: '#9EAFA5',
-    fontSize: 12,
+    color: APP_COLORS.textMuted,
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
   },
   moveBadge: {
-    color: '#00E5B4',
+    color: APP_COLORS.blueElectric,
     fontSize: 12,
-    fontWeight: '700',
-    backgroundColor: 'rgba(0, 229, 180, 0.12)',
+    fontWeight: '800',
+    backgroundColor: 'rgba(0, 210, 255, 0.12)',
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 210, 255, 0.3)',
   },
   clockDisplay: {
     fontSize: 64,
@@ -440,20 +435,20 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   lowTimeText: {
-    color: '#FF8C42',
+    color: APP_COLORS.warning,
   },
   flaggedText: {
-    color: '#FF4D4D',
+    color: APP_COLORS.danger,
   },
   turnIndicator: {
-    color: '#00E5B4',
+    color: APP_COLORS.blueElectric,
     fontSize: 12,
     fontWeight: '900',
     letterSpacing: 1.5,
     marginTop: 8,
   },
   flaggedBanner: {
-    color: '#FF4D4D',
+    color: APP_COLORS.danger,
     fontSize: 14,
     fontWeight: '900',
     letterSpacing: 1,
@@ -461,44 +456,46 @@ const styles = StyleSheet.create({
   },
   controlBar: {
     height: 72,
-    backgroundColor: '#0E1A14',
+    backgroundColor: APP_COLORS.surface,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 14,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#243C30',
+    borderColor: APP_COLORS.border,
   },
   controlIconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    backgroundColor: '#182C22',
+    borderRadius: 12,
+    backgroundColor: APP_COLORS.surfaceStrong,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
   controlBtnIcon: {
-    color: '#C5D0C9',
+    color: APP_COLORS.textSecondary,
     fontSize: 16,
     fontWeight: '900',
   },
   presetPill: {
-    backgroundColor: '#182C22',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#345242',
+    borderColor: APP_COLORS.borderGold,
     alignItems: 'center',
   },
   presetPillText: {
-    color: '#FFFFFF',
+    color: APP_COLORS.goldBright,
     fontSize: 13,
     fontWeight: '800',
   },
   presetPillSub: {
-    color: '#00E5B4',
+    color: APP_COLORS.blueElectric,
     fontSize: 10,
     fontWeight: '700',
   },
@@ -507,30 +504,30 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   actionButton: {
-    backgroundColor: '#00E5B4',
+    backgroundColor: APP_COLORS.goldPrimary,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
   },
   actionButtonText: {
-    color: '#09130F',
+    color: '#070B0E',
     fontSize: 12,
     fontWeight: '900',
   },
   resetButton: {
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surfaceStrong,
     borderWidth: 1,
-    borderColor: '#345242',
+    borderColor: APP_COLORS.border,
   },
   resetButtonText: {
-    color: '#C5D0C9',
+    color: APP_COLORS.textSecondary,
   },
   pressed: {
     opacity: 0.8,
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(5, 12, 9, 0.85)',
+    backgroundColor: 'rgba(4, 6, 8, 0.88)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -539,20 +536,20 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 420,
     maxHeight: '80%',
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 24,
     padding: 20,
-    borderWidth: 1,
-    borderColor: '#345242',
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
   },
   modalTitle: {
-    color: '#FFFFFF',
+    color: APP_COLORS.goldBright,
     fontSize: 18,
     fontWeight: '900',
     marginBottom: 4,
   },
   modalSubtitle: {
-    color: '#9EAFA5',
+    color: APP_COLORS.textSecondary,
     fontSize: 12,
     marginBottom: 16,
   },
@@ -563,16 +560,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#1B3025',
+    backgroundColor: APP_COLORS.surfaceStrong,
     padding: 14,
     borderRadius: 14,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
   presetOptionSelected: {
-    borderColor: '#00E5B4',
-    backgroundColor: '#1E3A2D',
+    borderColor: APP_COLORS.goldPrimary,
+    backgroundColor: 'rgba(229, 184, 105, 0.1)',
   },
   presetOptionTitle: {
     color: '#FFFFFF',
@@ -580,33 +577,35 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   presetOptionTitleActive: {
-    color: '#00E5B4',
+    color: APP_COLORS.goldBright,
   },
   presetOptionDetail: {
-    color: '#9EAFA5',
+    color: APP_COLORS.textSecondary,
     fontSize: 12,
     marginTop: 2,
   },
   presetCategoryBadge: {
-    color: '#F5C451',
+    color: APP_COLORS.goldBright,
     fontSize: 10,
     fontWeight: '900',
-    backgroundColor: 'rgba(245, 196, 81, 0.12)',
+    backgroundColor: 'rgba(229, 184, 105, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: APP_COLORS.borderGold,
   },
   closeModalButton: {
     marginTop: 14,
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#345242',
+    borderColor: APP_COLORS.border,
   },
   closeModalText: {
-    color: '#FFFFFF',
+    color: APP_COLORS.textSecondary,
     fontSize: 14,
     fontWeight: '800',
   },

@@ -36,6 +36,7 @@ import type { TrainingPuzzle } from '@/training/training-types';
 import { AnalysisEngine, type AdvantageEvaluation } from '@/services/analysisEngine';
 import { detectOpening } from '@/services/openingBook';
 import { extractMistakesFromGame, mistakeToTrainingPuzzle } from '@/services/mistakeTrainer';
+import { APP_COLORS } from '@/theme/colors';
 
 type GameMode = 'local' | 'ai' | 'rush';
 type AppSection = 'home' | 'play';
@@ -72,6 +73,7 @@ export default function Index() {
     resetGame: resetChessGame,
     selectPieceSquare,
   } = useChessGame();
+
   const {
     difficulty,
     setDifficulty,
@@ -88,6 +90,7 @@ export default function Index() {
       playMoveHaptics(record.san);
     },
   });
+
   const [mode, setMode] = useState<GameMode>('local');
   const [activeBot, setActiveBot] = useState<AiBot>(AI_BOTS[0]);
   const {
@@ -101,6 +104,7 @@ export default function Index() {
     recordAnalysis,
     reloadProgress,
   } = usePlayerProgress();
+
   const {
     coachLoading,
     coachMessage,
@@ -116,6 +120,7 @@ export default function Index() {
     onHintUsed: recordHint,
     onAnalysisCompleted: recordAnalysis,
   });
+
   const { visualPreferences, boardTheme, pieceSet, updateVisualPreferences } = useVisualPreferences();
   const {
     activePuzzle,
@@ -127,9 +132,10 @@ export default function Index() {
   } = useTrainingSession({
     onAttemptSubmitted: () => reloadProgress(),
   });
+
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [section, setSection] = useState<AppSection>('home');
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(true); // assume true until loaded
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(true);
 
   const [liveEval, setLiveEval] = useState<AdvantageEvaluation>({
     scoreCp: 0,
@@ -152,7 +158,7 @@ export default function Index() {
     }).catch(() => {});
   }, []);
 
-  // Update live evaluation when position or game changes
+  // Live evaluation update
   useEffect(() => {
     let isMounted = true;
     AnalysisEngine.getInstance()
@@ -186,7 +192,7 @@ export default function Index() {
     else { hapticMove(); playMove(); }
   };
 
-  const availableWidth = width - 30;
+  const availableWidth = width - 28;
   const landscapeLimit = width > height ? height - 110 : 440;
   const boardSize = Math.min(Math.max(availableWidth, 248), Math.max(landscapeLimit, 248), 440);
 
@@ -343,91 +349,263 @@ export default function Index() {
     return <OnboardingScreen onComplete={completeOnboarding} />;
   }
 
+  // --- HOME / PORTADA CINEMATOGRÁFICA ---
   if (section === 'home') {
-    const actions: readonly { label: string; detail: string; action: HomeActionType }[] = [
-      { label: 'JUGAR', detail: 'Partida local o contra IA', action: 'play' },
-      { label: 'PUZZLE RUSH CONTRARRELOJ', detail: '3 min, 5 min y Supervivencia (3 vidas) ⚡', action: 'puzzle-rush' },
-      { label: 'PUZZLE DEL DÍA', detail: 'Táctica diaria por niveles ELO y racha 🔥', action: 'puzzles' },
-      { label: 'EXPLORADOR DE APERTURAS', detail: '100+ aperturas y variantes ECO con planes estratégicos', action: 'openings' },
-      { label: 'VISOR Y REPRODUCTOR PGN', detail: 'Partidas maestras de Morphy, Fischer y Kasparov', action: 'pgn-viewer' },
-      { label: 'RELOJ DE TORNEO FIDE', detail: 'Reloj Blitz, Bullet y Rapid para tablero físico', action: 'clock' },
-      { label: 'VITRINA DE TROFEOS', detail: '16 logros y medallas desbloqueables', action: 'achievements' },
-      { label: 'ENTRENAR', detail: 'Ejercicio táctico adaptativo', action: 'training' },
-      { label: 'AJUSTES', detail: '5 Temas HD, piezas y sonidos Hi-Fi', action: 'settings' },
+    const luxuryTiles = [
+      {
+        icon: '⚔️',
+        title: 'Jugar vs IA / Local',
+        subtitle: 'Motor Stockfish 18 con 8 niveles ELO',
+        badge: 'DUELO',
+        action: 'play' as HomeActionType,
+      },
+      {
+        icon: '⚡',
+        title: 'Puzzle Rush Contrarreloj',
+        subtitle: '3 min, 5 min y Modo Supervivencia (3 vidas)',
+        badge: 'RUSH',
+        action: 'puzzle-rush' as HomeActionType,
+      },
+      {
+        icon: '🧩',
+        title: 'Puzzle del Día',
+        subtitle: 'Táctica diaria por niveles ELO con racha activa',
+        badge: 'DIARIO',
+        action: 'puzzles' as HomeActionType,
+      },
+      {
+        icon: '🧠',
+        title: 'Entrenador Táctico',
+        subtitle: 'Aprende de tus errores y ejercicios adaptativos',
+        badge: 'COACH',
+        action: 'training' as HomeActionType,
+      },
+      {
+        icon: '📖',
+        title: 'Enciclopedia ECO',
+        subtitle: '100+ aperturas y variantes con planes estratégicos',
+        badge: 'TEORÍA',
+        action: 'openings' as HomeActionType,
+      },
+      {
+        icon: '📜',
+        title: 'Visor PGN Maestro',
+        subtitle: 'Partidas inmortales de Morphy, Fischer y Kasparov',
+        badge: 'CLÁSICOS',
+        action: 'pgn-viewer' as HomeActionType,
+      },
+      {
+        icon: '⏱️',
+        title: 'Reloj FIDE de Torneo',
+        subtitle: 'Reloj digital táctil Blitz, Bullet y Rapid',
+        badge: 'FIDE',
+        action: 'clock' as HomeActionType,
+      },
+      {
+        icon: '🏆',
+        title: 'Vitrina de Trofeos',
+        subtitle: '16 medallas y logros desbloqueables',
+        badge: 'LOGROS',
+        action: 'achievements' as HomeActionType,
+      },
+      {
+        icon: '⚙️',
+        title: 'Ajustes & Apariencia',
+        subtitle: 'Temas HD, piezas doradas y sonidos Hi-Fi',
+        badge: 'HD',
+        action: 'settings' as HomeActionType,
+      },
     ];
+
     return (
-      <ScrollView contentInsetAdjustmentBehavior="automatic" style={styles.root} contentContainerStyle={styles.container}>
-        <View style={styles.homeHero}>
-          <Text selectable style={styles.eyebrow}>AJEDREZPRO · MASTER EDITION V1.3</Text>
-          <Text selectable style={styles.title}>Hola jugador</Text>
-          <Text selectable style={styles.homeCopy}>Domina cada fase del juego: apertura teórica, táctica relámpago y final de maestros.</Text>
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        style={styles.root}
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* BRANDING HERO */}
+        <Animated.View entering={FadeInDown.duration(280)} style={styles.heroCard}>
+          <View style={styles.heroHeaderRow}>
+            <View style={styles.crownContainer}>
+              <Text style={styles.crownIcon}>♛</Text>
+            </View>
+            <View style={styles.brandTitleCol}>
+              <Text style={styles.brandEyebrow}>GRAN MAESTRO EDITION</Text>
+              <Text style={styles.brandTitle}>AJEDREZ PRO</Text>
+            </View>
+            <View style={styles.heroVersionBadge}>
+              <Text style={styles.heroVersionText}>v1.3</Text>
+            </View>
+          </View>
+          <Text style={styles.heroSubtitle}>
+            Apertura teórica, cálculo táctico relámpago y comprensión magistral.
+          </Text>
+        </Animated.View>
+
+        {/* STATS OVERVIEW CARD */}
+        <View style={styles.statsCard}>
+          <View style={styles.statBox}>
+            <Text style={styles.statValueGold}>{playerLevel}</Text>
+            <Text style={styles.statLabel}>Rango</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statBox}>
+            <Text style={styles.statValueCyan}>{gamification.xp}</Text>
+            <Text style={styles.statLabel}>XP Total</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statBox}>
+            <Text style={styles.statValueGold}>⚡ {chessStats.puzzleRushHighScore}</Text>
+            <Text style={styles.statLabel}>Récord Rush</Text>
+          </View>
         </View>
-        <View style={styles.homeStats}>
-          <View style={styles.profileStat}><Text selectable numberOfLines={1} adjustsFontSizeToFit style={[styles.profileValue, styles.homeLevelValue]}>{playerLevel}</Text><Text selectable style={styles.profileLabel}>nivel</Text></View>
-          <View style={styles.profileStat}><Text selectable style={styles.profileValue}>{gamification.xp}</Text><Text selectable style={styles.profileLabel}>XP</Text></View>
-          <View style={styles.profileStat}><Text selectable style={styles.profileValue}>{chessStats.puzzleRushHighScore}</Text><Text selectable style={styles.profileLabel}>récord rush</Text></View>
+
+        {/* PRIMARY CTA: JUGAR AHORA */}
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            selectMode('local');
+            setSection('play');
+          }}
+          style={({ pressed }) => [styles.primaryHeroButton, pressed && styles.pressed]}
+        >
+          <View style={styles.primaryHeroContent}>
+            <Text style={styles.primaryHeroIcon}>♟️</Text>
+            <View>
+              <Text style={styles.primaryHeroTitle}>JUGAR PARTIDA</Text>
+              <Text style={styles.primaryHeroSubtitle}>Partida rápida local o desafía a Stockfish</Text>
+            </View>
+          </View>
+          <Text style={styles.primaryHeroArrow}>→</Text>
+        </Pressable>
+
+        {/* LUXURY MODULE TILES GRID */}
+        <View style={styles.tilesGrid}>
+          {luxuryTiles.map((tile) => (
+            <Pressable
+              key={tile.title}
+              accessibilityRole="button"
+              onPress={() => openHomeAction(tile.action)}
+              style={({ pressed }) => [styles.tileCard, pressed && styles.pressed]}
+            >
+              <View style={styles.tileTopRow}>
+                <Text style={styles.tileIcon}>{tile.icon}</Text>
+                <View style={styles.tileBadge}>
+                  <Text style={styles.tileBadgeText}>{tile.badge}</Text>
+                </View>
+              </View>
+              <Text numberOfLines={1} style={styles.tileTitle}>{tile.title}</Text>
+              <Text numberOfLines={2} style={styles.tileSubtitle}>{tile.subtitle}</Text>
+            </Pressable>
+          ))}
         </View>
-        <View style={styles.homeInfo}><Text selectable style={styles.profileTitle}>Reto diario</Text><Text selectable style={styles.profileWeaknesses}>{gamification.dailyChallenge ? `${gamification.dailyChallenge.title} · ${gamification.dailyChallenge.progress}/${gamification.dailyChallenge.target}` : 'Completa una actividad para activar tu reto.'}</Text><Text selectable style={styles.profileWeaknesses}>{nextAchievement ? `Próximo logro: ${nextAchievement.title}` : 'Todos los logros actuales desbloqueados.'}</Text></View>
-        <View style={styles.homeActions}>{actions.map((item) => <Pressable key={item.label} accessibilityRole="button" onPress={() => openHomeAction(item.action)} style={({ pressed }) => [styles.homeAction, pressed && styles.pressed]}><Text style={styles.homeActionTitle}>{item.label}</Text><Text style={styles.homeActionDetail}>{item.detail}</Text></Pressable>)}</View>
+
+        {/* PRIVACY FOOTER */}
         <Pressable
           accessibilityRole="link"
           accessibilityLabel="Abrir política de privacidad"
           onPress={() => router.push('/privacy' as never)}
           style={({ pressed }) => [styles.privacyFooterLink, pressed && styles.pressed]}
         >
-          <Text style={styles.privacyFooterText}>Política de Privacidad</Text>
+          <Text style={styles.privacyFooterText}>Política de Privacidad y Términos</Text>
         </Pressable>
       </ScrollView>
     );
   }
 
+  // --- PLAY SECTION ---
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       style={styles.root}
       contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
     >
+      {/* PLAY HEADER */}
       <View style={styles.header}>
-        <View>
-          <Text selectable style={styles.eyebrow}>{mode === 'ai' ? 'VS STOCKFISH' : 'PARTIDA LOCAL'}</Text>
-          <Text selectable style={styles.title}>AjedrezPro</Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setSection('home')}
+          style={styles.backHomeBtn}
+        >
+          <Text style={styles.backHomeBtnText}>← Menú</Text>
+        </Pressable>
+
+        <View style={styles.headerTitleCol}>
+          <Text style={styles.headerEyebrow}>
+            {mode === 'ai' ? 'VS STOCKFISH' : mode === 'rush' ? 'PUZZLE RUSH' : 'PARTIDA LOCAL'}
+          </Text>
+          <Text style={styles.headerTitle}>AjedrezPro</Text>
         </View>
+
         <View style={styles.headerTools}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Puzzle Rush" onPress={() => router.push('/puzzle-rush' as never)} style={styles.headerToolBtn}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Puzzle Rush"
+            onPress={() => router.push('/puzzle-rush' as never)}
+            style={styles.headerToolBtn}
+          >
             <Text style={styles.headerToolIcon}>⚡</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Reloj FIDE" onPress={() => router.push('/clock' as never)} style={styles.headerToolBtn}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Reloj FIDE"
+            onPress={() => router.push('/clock' as never)}
+            style={styles.headerToolBtn}
+          >
             <Text style={styles.headerToolIcon}>⏱</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Puzzles" onPress={() => router.push('/puzzles' as never)} style={styles.headerToolBtn}>
-            <Text style={styles.headerToolIcon}>🧩</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Aperturas" onPress={() => router.push('/openings' as never)} style={styles.headerToolBtn}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Aperturas"
+            onPress={() => router.push('/openings' as never)}
+            style={styles.headerToolBtn}
+          >
             <Text style={styles.headerToolIcon}>📖</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Visor PGN" onPress={() => router.push('/pgn-viewer' as never)} style={styles.headerToolBtn}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Visor PGN"
+            onPress={() => router.push('/pgn-viewer' as never)}
+            style={styles.headerToolBtn}
+          >
             <Text style={styles.headerToolIcon}>📜</Text>
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="Trofeos" onPress={() => router.push('/achievements' as never)} style={styles.headerToolBtn}>
-            <Text style={styles.headerToolIcon}>🏆</Text>
-          </Pressable>
-          <View style={styles.moveCounter}>
-            <Text selectable style={styles.counterNumber}>{history.length}</Text>
-            <Text selectable style={styles.counterLabel}>{history.length === 1 ? 'jugada' : 'jugadas'}</Text>
-          </View>
         </View>
       </View>
-      <Pressable accessibilityRole="button" onPress={() => setSection('home')} style={styles.homeLink}><Text style={styles.homeLinkText}>Inicio</Text></Pressable>
 
+      {/* MODE SELECTOR */}
       <View accessibilityRole="radiogroup" style={styles.modeSelector}>
-        <Pressable accessibilityRole="radio" accessibilityState={{ checked: mode === 'local' }} onPress={() => selectMode('local')} style={[styles.modeOption, mode === 'local' && styles.modeOptionActive]}>
-          <Text style={[styles.modeText, mode === 'local' && styles.modeTextActive]}>2 jugadores local</Text>
+        <Pressable
+          accessibilityRole="radio"
+          accessibilityState={{ checked: mode === 'local' }}
+          onPress={() => selectMode('local')}
+          style={[styles.modeOption, mode === 'local' && styles.modeOptionActive]}
+        >
+          <Text style={[styles.modeText, mode === 'local' && styles.modeTextActive]}>
+            Local 2P
+          </Text>
         </Pressable>
-        <Pressable accessibilityRole="radio" accessibilityState={{ checked: mode === 'ai' }} onPress={() => selectMode('ai')} style={[styles.modeOption, mode === 'ai' && styles.modeOptionActive]}>
-          <Text style={[styles.modeText, mode === 'ai' && styles.modeTextActive]}>Jugar contra IA</Text>
+        <Pressable
+          accessibilityRole="radio"
+          accessibilityState={{ checked: mode === 'ai' }}
+          onPress={() => selectMode('ai')}
+          style={[styles.modeOption, mode === 'ai' && styles.modeOptionActive]}
+        >
+          <Text style={[styles.modeText, mode === 'ai' && styles.modeTextActive]}>
+            Contra IA
+          </Text>
         </Pressable>
-        <Pressable accessibilityRole="radio" accessibilityState={{ checked: mode === 'rush' }} onPress={() => selectMode('rush')} style={[styles.modeOption, mode === 'rush' && styles.modeOptionActive]}>
-          <Text style={[styles.modeText, mode === 'rush' && styles.modeTextActive]}>Supervivencia</Text>
+        <Pressable
+          accessibilityRole="radio"
+          accessibilityState={{ checked: mode === 'rush' }}
+          onPress={() => selectMode('rush')}
+          style={[styles.modeOption, mode === 'rush' && styles.modeOptionActive]}
+        >
+          <Text style={[styles.modeText, mode === 'rush' && styles.modeTextActive]}>
+            Rush Táctico
+          </Text>
         </Pressable>
       </View>
 
@@ -448,9 +626,10 @@ export default function Index() {
         </Pressable>
       ) : null}
 
+      {/* BOT SELECTION IF IN AI MODE */}
       {mode === 'ai' ? (
         <View style={styles.difficultyCard}>
-          <Text selectable style={styles.difficultyLabel}>Selecciona tu Oponente</Text>
+          <Text style={styles.difficultyLabel}>SELECCIONA TU OPONENTE</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.difficultyOptions}>
             {AI_BOTS.map((bot) => (
               <Pressable
@@ -464,7 +643,7 @@ export default function Index() {
                 <Text style={styles.botAvatar}>{bot.avatar}</Text>
                 <View>
                   <Text style={[styles.botName, activeBot.id === bot.id && styles.botNameActive]}>{bot.name}</Text>
-                  <Text style={[styles.botDesc, activeBot.id === bot.id && styles.botDescActive]}>Dificultad {bot.difficulty}</Text>
+                  <Text style={[styles.botDesc, activeBot.id === bot.id && styles.botDescActive]}>Nivel {bot.difficulty} ({bot.playStyle})</Text>
                 </View>
               </Pressable>
             ))}
@@ -473,23 +652,34 @@ export default function Index() {
         </View>
       ) : null}
 
-      <Animated.View entering={FadeInDown.duration(220)} layout={LinearTransition.duration(180)} style={[styles.statusCard, status.check && styles.checkCard]}>
+      {/* GAME STATUS BANNER */}
+      <Animated.View
+        entering={FadeInDown.duration(220)}
+        layout={LinearTransition.duration(180)}
+        style={[styles.statusCard, status.check && styles.checkCard]}
+      >
         <View style={[styles.turnDot, position.turn === 'w' ? styles.whiteTurn : styles.blackTurn]} />
         <View style={styles.statusCopy}>
           <Text selectable accessibilityLiveRegion="polite" style={[styles.statusTitle, status.check && styles.checkText]}>
-            {thinking ? 'Pensando…' : message}
+            {thinking ? 'Stockfish calculando…' : message}
           </Text>
           <Text selectable style={styles.statusDetail}>
-            {thinking ? `${difficultyDefinition(difficulty).name} · ${Platform.OS === 'web' ? 'Stockfish 18' : 'Motor local'}` : status.gameOver ? 'La partida ha finalizado' : selected === null ? 'Toca una pieza para ver sus movimientos' : 'Elige una casilla marcada'}
+            {thinking
+              ? `${difficultyDefinition(difficulty).name} · ${Platform.OS === 'web' ? 'Stockfish 18' : 'Motor local'}`
+              : status.gameOver
+                ? 'Partida finalizada'
+                : selected === null
+                  ? 'Toca una pieza para ver sus movimientos legales'
+                  : 'Elige una casilla marcada'}
           </Text>
         </View>
         {status.check && !status.checkmate ? <Text accessibilityLabel="Jaque" style={styles.checkBadge}>JAQUE</Text> : null}
       </Animated.View>
 
-      {status.checkmate && status.winner === 'w' ? (
-        <VictoryCelebration />
-      ) : null}
+      {/* VICTORY CELEBRATION */}
+      {status.checkmate && status.winner === 'w' ? <VictoryCelebration /> : null}
 
+      {/* PUZZLE RUSH IN-GAME PANEL */}
       {mode === 'rush' ? (
         <PuzzleRushPanel
           isActive={rush.isActive}
@@ -503,13 +693,14 @@ export default function Index() {
         />
       ) : null}
 
+      {/* POST GAME SUMMARY */}
       <PostGamePanel
         status={status}
         postGameSummary={postGameSummary}
         onRetryMistakes={() => void handleRetryMistakes()}
       />
 
-      {/* LIVE ADVANTAGE EVALUATION BAR */}
+      {/* BOARD + LIVE EVALUATION BAR */}
       <View style={styles.boardContainer}>
         <EvalBar
           whiteWinProbability={liveEval.whiteWinProbability}
@@ -533,6 +724,7 @@ export default function Index() {
         />
       </View>
 
+      {/* TRAINING FEEDBACK */}
       <TrainingPanel
         activePuzzle={activePuzzle}
         puzzleFeedback={puzzleFeedback}
@@ -542,16 +734,18 @@ export default function Index() {
 
       {aiError ? <Text selectable accessibilityRole="alert" style={styles.aiError}>{aiError}</Text> : null}
 
+      {/* ACTION CONTROLS */}
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
           onPress={resetGame}
           style={({ pressed }) => [styles.newGameButton, pressed && styles.pressed]}
         >
-          <Text style={styles.primaryButtonText}>Nueva partida</Text>
+          <Text style={styles.primaryButtonText}>Nueva Partida</Text>
         </Pressable>
       </View>
 
+      {/* COACH PANEL */}
       <CoachPanel
         coachMessage={coachMessage}
         contextualMessage={contextualCoachMessage(status, history.length)}
@@ -563,6 +757,7 @@ export default function Index() {
         onAnalyzeGame={() => void analyzeCurrentGame()}
       />
 
+      {/* PROFILE PROGRESS PANEL */}
       <ProfilePanel
         profile={profile}
         gamification={gamification}
@@ -571,6 +766,7 @@ export default function Index() {
         nextAchievement={nextAchievement}
       />
 
+      {/* SETTINGS PANEL */}
       <SettingsPanel
         expanded={settingsExpanded}
         onToggle={() => setSettingsExpanded((prev) => !prev)}
@@ -578,8 +774,10 @@ export default function Index() {
         onUpdatePreferences={updateVisualPreferences}
       />
 
+      {/* HISTORY NOTATION */}
       <HistoryPanel history={history} />
 
+      {/* GAME OVER MODAL */}
       <GameOverModal
         status={status}
         moveCount={history.length}
@@ -587,6 +785,7 @@ export default function Index() {
         onNewGame={resetGame}
       />
 
+      {/* PROMOTION PICKER */}
       <PromotionPicker
         visible={pendingPromotion !== null}
         color={position.turn}
@@ -598,36 +797,310 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#09130f' },
-  container: { paddingHorizontal: 12, paddingTop: 16, paddingBottom: 48, alignItems: 'center', gap: 12 },
-  homeHero: { width: '100%', maxWidth: 440, gap: 5, padding: 20, borderRadius: 20, borderCurve: 'continuous', backgroundColor: '#1B3025', borderWidth: 1, borderColor: '#3B5A49' },
-  homeCopy: { color: '#C5D0C9', fontSize: 14, lineHeight: 20 },
-  homeStats: { width: '100%', maxWidth: 440, flexDirection: 'row', gap: 8 },
-  homeInfo: { width: '100%', maxWidth: 440, gap: 5, padding: 14, borderRadius: 16, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235' },
-  homeActions: { width: '100%', maxWidth: 440, gap: 8 },
-  homeAction: { minHeight: 62, gap: 2, justifyContent: 'center', paddingHorizontal: 16, borderRadius: 16, borderCurve: 'continuous', backgroundColor: '#22362C', borderWidth: 1, borderColor: '#3B5A49' },
-  homeActionTitle: { color: '#F6E6BD', fontSize: 15, fontWeight: '900', letterSpacing: 0.4 },
-  homeActionDetail: { color: '#9EAFA5', fontSize: 12 },
-  homeLink: { alignSelf: 'flex-start', minHeight: 36, justifyContent: 'center', paddingHorizontal: 12, borderRadius: 10, backgroundColor: '#22362C' },
-  homeLinkText: { color: '#F6E6BD', fontSize: 13, fontWeight: '800' },
-  header: { width: '100%', maxWidth: 440, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4 },
-  headerTools: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  headerToolBtn: { width: 34, height: 34, borderRadius: 10, backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235', justifyContent: 'center', alignItems: 'center' },
-  headerToolIcon: { fontSize: 15 },
-  eyebrow: { color: '#9EAFA5', fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
-  title: { color: '#F6E6BD', fontSize: 26, fontWeight: '900', letterSpacing: -0.6 },
-  moveCounter: { minWidth: 50, minHeight: 38, paddingHorizontal: 8, justifyContent: 'center', alignItems: 'center', borderRadius: 10, borderCurve: 'continuous', backgroundColor: '#14241D' },
-  counterNumber: { color: '#F5C451', fontSize: 16, fontWeight: '900', fontVariant: ['tabular-nums'] },
-  counterLabel: { color: '#9EAFA5', fontSize: 9, fontWeight: '700' },
-  modeSelector: { width: '100%', maxWidth: 440, flexDirection: 'row', gap: 6, padding: 5, borderRadius: 17, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235' },
-  modeOption: { flex: 1, minHeight: 44, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 8, borderRadius: 12, borderCurve: 'continuous' },
-  modeOptionActive: { backgroundColor: '#D6A943' },
-  modeText: { color: '#9EAFA5', fontSize: 13, fontWeight: '800', textAlign: 'center' },
-  modeTextActive: { color: '#162019' },
+  root: { flex: 1, backgroundColor: APP_COLORS.background },
+  container: { paddingHorizontal: 14, paddingTop: 16, paddingBottom: 48, alignItems: 'center', gap: 12 },
+
+  // --- HOME STYLES ---
+  heroCard: {
+    width: '100%',
+    maxWidth: 440,
+    padding: 18,
+    borderRadius: 22,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
+    gap: 8,
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 14px rgba(229, 184, 105, 0.15)',
+  },
+  heroHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  crownContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(229, 184, 105, 0.12)',
+    borderWidth: 1,
+    borderColor: APP_COLORS.goldPrimary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  crownIcon: {
+    color: APP_COLORS.goldBright,
+    fontSize: 24,
+  },
+  brandTitleCol: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  brandEyebrow: {
+    color: APP_COLORS.blueElectric,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1.5,
+  },
+  brandTitle: {
+    color: APP_COLORS.goldBright,
+    fontSize: 24,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+  },
+  heroVersionBadge: {
+    backgroundColor: APP_COLORS.surfaceStrong,
+    borderWidth: 1,
+    borderColor: APP_COLORS.borderLight,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  heroVersionText: {
+    color: APP_COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  heroSubtitle: {
+    color: APP_COLORS.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+
+  statsCard: {
+    width: '100%',
+    maxWidth: 440,
+    flexDirection: 'row',
+    backgroundColor: APP_COLORS.surface,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    padding: 12,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  statBox: {
+    alignItems: 'center',
+    gap: 2,
+    flex: 1,
+  },
+  statValueGold: {
+    color: APP_COLORS.goldBright,
+    fontSize: 18,
+    fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+  },
+  statValueCyan: {
+    color: APP_COLORS.blueElectric,
+    fontSize: 18,
+    fontWeight: '900',
+    fontVariant: ['tabular-nums'],
+  },
+  statLabel: {
+    color: APP_COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+  },
+  statDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: APP_COLORS.border,
+  },
+
+  primaryHeroButton: {
+    width: '100%',
+    maxWidth: 440,
+    backgroundColor: APP_COLORS.goldPrimary,
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    boxShadow: '0 6px 20px rgba(212, 175, 55, 0.35)',
+  },
+  primaryHeroContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  primaryHeroIcon: {
+    fontSize: 26,
+  },
+  primaryHeroTitle: {
+    color: '#070B0E',
+    fontSize: 16,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  primaryHeroSubtitle: {
+    color: '#36270A',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  primaryHeroArrow: {
+    color: '#070B0E',
+    fontSize: 22,
+    fontWeight: '900',
+  },
+
+  tilesGrid: {
+    width: '100%',
+    maxWidth: 440,
+    gap: 8,
+  },
+  tileCard: {
+    backgroundColor: APP_COLORS.surface,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    padding: 14,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
+    gap: 4,
+  },
+  tileTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  tileIcon: {
+    fontSize: 20,
+  },
+  tileBadge: {
+    backgroundColor: 'rgba(0, 210, 255, 0.12)',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 210, 255, 0.35)',
+  },
+  tileBadgeText: {
+    color: APP_COLORS.blueElectric,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  tileTitle: {
+    color: APP_COLORS.goldBright,
+    fontSize: 14,
+    fontWeight: '900',
+    marginTop: 2,
+  },
+  tileSubtitle: {
+    color: APP_COLORS.textSecondary,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+
+  privacyFooterLink: {
+    minHeight: 44,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  privacyFooterText: {
+    color: APP_COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+  },
+
+  // --- PLAY STYLES ---
+  header: {
+    width: '100%',
+    maxWidth: 440,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backHomeBtn: {
+    backgroundColor: APP_COLORS.surfaceStrong,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+  backHomeBtnText: {
+    color: APP_COLORS.blueElectric,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  headerTitleCol: {
+    alignItems: 'center',
+  },
+  headerEyebrow: {
+    color: APP_COLORS.blueElectric,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1.5,
+  },
+  headerTitle: {
+    color: APP_COLORS.goldBright,
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  headerTools: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  headerToolBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerToolIcon: {
+    fontSize: 15,
+  },
+
+  modeSelector: {
+    width: '100%',
+    maxWidth: 440,
+    flexDirection: 'row',
+    gap: 6,
+    padding: 4,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
+  },
+  modeOption: {
+    flex: 1,
+    minHeight: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+  },
+  modeOptionActive: {
+    backgroundColor: APP_COLORS.goldPrimary,
+  },
+  modeText: {
+    color: APP_COLORS.textSecondary,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  modeTextActive: {
+    color: '#070B0E',
+    fontWeight: '900',
+  },
+
   detectedOpeningCard: {
     width: '100%',
     maxWidth: 440,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -635,51 +1108,197 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.borderGold,
   },
   detectedOpeningBadge: {
-    backgroundColor: 'rgba(0, 229, 180, 0.15)',
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
   },
-  detectedOpeningBadgeText: { color: '#00E5B4', fontSize: 11, fontWeight: '900' },
-  detectedOpeningText: { color: '#FFFFFF', fontSize: 12, fontWeight: '800', flex: 1 },
-  detectedOpeningArrow: { color: '#00E5B4', fontSize: 12, fontWeight: '800' },
-  difficultyCard: { width: '100%', maxWidth: 440, gap: 8, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 17, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235' },
-  difficultyLabel: { color: '#F6E6BD', fontSize: 12, fontWeight: '800' },
-  difficultyOptions: { flexDirection: 'row', gap: 7 },
-  botOption: { minWidth: 140, padding: 12, borderRadius: 12, borderCurve: 'continuous', backgroundColor: '#22362C', flexDirection: 'row', alignItems: 'center', gap: 10 },
-  botOptionActive: { backgroundColor: '#D6A943' },
-  botAvatar: { fontSize: 24 },
-  botName: { color: '#F8F4EA', fontSize: 13, fontWeight: '800' },
-  botNameActive: { color: '#162019' },
-  botDesc: { color: '#9EAFA5', fontSize: 11 },
-  botDescActive: { color: '#3B2D10' },
-  botGreeting: { color: '#9EAFA5', fontSize: 13, fontStyle: 'italic', marginTop: 8, paddingHorizontal: 4 },
-  statusCard: { width: '100%', maxWidth: 440, minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 18, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235' },
-  checkCard: { backgroundColor: '#321B17', borderColor: '#A84737' },
-  turnDot: { width: 18, height: 18, borderRadius: 9, borderWidth: 2 },
-  whiteTurn: { backgroundColor: '#F5EBD5', borderColor: '#FFFFFF' },
-  blackTurn: { backgroundColor: '#18201C', borderColor: '#829188' },
-  statusCopy: { flex: 1 },
-  statusTitle: { color: '#F8F4EA', fontSize: 16, fontWeight: '800' },
-  checkText: { color: '#FFD8CF' },
-  statusDetail: { color: '#9EAFA5', fontSize: 12, paddingTop: 2 },
-  checkBadge: { color: '#FFFFFF', backgroundColor: '#C44732', overflow: 'hidden', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 5, fontSize: 10, fontWeight: '900', letterSpacing: 0.7 },
-  boardContainer: { alignItems: 'center', width: '100%', maxWidth: 440 },
-  actions: { width: '100%', maxWidth: 440, gap: 8 },
-  newGameButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', backgroundColor: '#D6A943', borderRadius: 16, borderCurve: 'continuous' },
-  pressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
-  primaryButtonText: { color: '#162019', fontSize: 16, fontWeight: '900' },
-  profileTitle: { color: '#F5C451', fontSize: 13, fontWeight: '900' },
-  profileStats: { flexDirection: 'row', gap: 8 },
-  profileStat: { flex: 1, minHeight: 56, alignItems: 'center', justifyContent: 'center', borderRadius: 12, borderCurve: 'continuous', backgroundColor: '#22362C' },
-  profileValue: { color: '#F8F4EA', fontSize: 18, fontWeight: '900', fontVariant: ['tabular-nums'] },
-  homeLevelValue: { fontSize: 15, textAlign: 'center' },
-  profileLabel: { color: '#9EAFA5', fontSize: 10, fontWeight: '800', textTransform: 'uppercase' },
-  profileWeaknesses: { color: '#C5D0C9', fontSize: 12, lineHeight: 18 },
-  aiError: { width: '100%', maxWidth: 440, color: '#FFD8CF', backgroundColor: '#321B17', borderWidth: 1, borderColor: '#A84737', borderRadius: 12, borderCurve: 'continuous', padding: 12, fontSize: 13 },
-  privacyFooterLink: { minHeight: 44, paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-  privacyFooterText: { color: '#9EAFA5', fontSize: 12, fontWeight: '700', textDecorationLine: 'underline' },
+  detectedOpeningBadgeText: {
+    color: APP_COLORS.goldBright,
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  detectedOpeningText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '800',
+    flex: 1,
+  },
+  detectedOpeningArrow: {
+    color: APP_COLORS.goldBright,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+
+  difficultyCard: {
+    width: '100%',
+    maxWidth: 440,
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
+  },
+  difficultyLabel: {
+    color: APP_COLORS.blueElectric,
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  difficultyOptions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  botOption: {
+    minWidth: 140,
+    padding: 10,
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surfaceStrong,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  botOptionActive: {
+    backgroundColor: 'rgba(0, 210, 255, 0.15)',
+    borderColor: APP_COLORS.blueElectric,
+  },
+  botAvatar: {
+    fontSize: 22,
+  },
+  botName: {
+    color: APP_COLORS.text,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  botNameActive: {
+    color: APP_COLORS.blueElectric,
+  },
+  botDesc: {
+    color: APP_COLORS.textSecondary,
+    fontSize: 11,
+  },
+  botDescActive: {
+    color: APP_COLORS.textSecondary,
+  },
+  botGreeting: {
+    color: APP_COLORS.textMuted,
+    fontSize: 12,
+    fontStyle: 'italic',
+    paddingHorizontal: 4,
+  },
+
+  statusCard: {
+    width: '100%',
+    maxWidth: 440,
+    minHeight: 58,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
+  },
+  checkCard: {
+    backgroundColor: '#350E12',
+    borderColor: APP_COLORS.danger,
+  },
+  turnDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+  },
+  whiteTurn: {
+    backgroundColor: APP_COLORS.goldBright,
+    borderColor: '#FFFFFF',
+  },
+  blackTurn: {
+    backgroundColor: '#070B0E',
+    borderColor: APP_COLORS.blueElectric,
+  },
+  statusCopy: {
+    flex: 1,
+  },
+  statusTitle: {
+    color: APP_COLORS.text,
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  checkText: {
+    color: '#FFBABA',
+  },
+  statusDetail: {
+    color: APP_COLORS.textSecondary,
+    fontSize: 11,
+    paddingTop: 1,
+  },
+  checkBadge: {
+    color: '#FFFFFF',
+    backgroundColor: APP_COLORS.danger,
+    overflow: 'hidden',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+
+  boardContainer: {
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 440,
+  },
+
+  actions: {
+    width: '100%',
+    maxWidth: 440,
+    gap: 8,
+  },
+  newGameButton: {
+    minHeight: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: APP_COLORS.goldPrimary,
+    borderRadius: 16,
+    borderCurve: 'continuous',
+    boxShadow: '0 4px 14px rgba(229, 184, 105, 0.3)',
+  },
+  primaryButtonText: {
+    color: '#070B0E',
+    fontSize: 15,
+    fontWeight: '900',
+    letterSpacing: 0.3,
+  },
+
+  aiError: {
+    width: '100%',
+    maxWidth: 440,
+    color: '#FFD8CF',
+    backgroundColor: '#321B17',
+    borderWidth: 1,
+    borderColor: '#A84737',
+    borderRadius: 12,
+    borderCurve: 'continuous',
+    padding: 12,
+    fontSize: 13,
+  },
+
+  pressed: {
+    opacity: 0.75,
+    transform: [{ scale: 0.985 }],
+  },
 });

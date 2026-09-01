@@ -5,6 +5,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import { APP_COLORS } from '@/theme/colors';
 
 interface EvalBarProps {
   readonly whiteWinProbability: number; // 0 to 100
@@ -46,7 +47,12 @@ export function EvalBar({
   const isWhiteFavored = whiteWinProbability >= 50;
 
   return (
-    <View style={[styles.container, orientation === 'horizontal' ? { height, width: width ?? '100%' } : styles.verticalContainer]}>
+    <View
+      style={[
+        styles.container,
+        orientation === 'horizontal' ? { height, width: width ?? '100%' } : styles.verticalContainer,
+      ]}
+    >
       {/* Background represents Black's advantage */}
       <View style={styles.blackBackground}>
         {/* Animated Fill represents White's advantage */}
@@ -74,10 +80,11 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#3B5A49',
-    backgroundColor: '#14241D',
+    borderColor: APP_COLORS.borderGold,
+    backgroundColor: APP_COLORS.surface,
     position: 'relative',
     marginVertical: 6,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
   },
   verticalContainer: {
     width: 24,
@@ -89,11 +96,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#1E232A', // Deep carbon dark
+    backgroundColor: '#070E17', // Deep obsidian black
     flexDirection: 'row',
   },
   whiteFill: {
-    backgroundColor: '#E8ECE9', // Crisp ivory white
+    backgroundColor: '#E5B869', // Metallic gold for White
     height: '100%',
   },
   labelsOverlay: {
@@ -114,21 +121,23 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   whiteText: {
-    color: '#0F1E17', // Dark contrast over white portion
+    color: '#070B0E', // Dark contrast over gold portion
   },
   blackText: {
-    color: '#E8ECE9', // White contrast over dark portion
+    color: '#E0EEFF', // Light cyan contrast over dark portion
   },
   ratioWrapper: {
-    backgroundColor: 'rgba(9, 19, 15, 0.65)',
+    backgroundColor: 'rgba(7, 11, 14, 0.75)',
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 210, 255, 0.3)',
   },
   ratioText: {
-    color: '#00E5B4',
+    color: APP_COLORS.blueElectric,
     fontSize: 10,
-    fontWeight: '800',
+    fontWeight: '900',
     fontVariant: ['tabular-nums'],
   },
 });

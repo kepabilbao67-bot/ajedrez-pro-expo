@@ -27,6 +27,7 @@ import type { TacticalPuzzleItem } from '@/training/content/offline-tactics-pack
 import { useVisualPreferences } from '@/hooks/use-visual-preferences';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useAudioSfx } from '@/hooks/use-audio-sfx';
+import { APP_COLORS } from '@/theme/colors';
 
 export function PuzzlesScreen() {
   const router = useRouter();
@@ -83,8 +84,8 @@ export function PuzzlesScreen() {
     loadPuzzle(daily);
   };
 
-  const availableWidth = width - 32;
-  const boardSize = Math.min(Math.max(availableWidth, 240), height - 260, 420);
+  const availableWidth = width - 28;
+  const boardSize = Math.min(Math.max(availableWidth, 240), height - 260, 400);
 
   const handleSquarePress = (square: Square) => {
     if (isCompleted) return;
@@ -121,7 +122,6 @@ export function PuzzlesScreen() {
     const isMatch =
       expectedMove &&
       ((expectedMove.from === fromAlg && expectedMove.to === toAlg) ||
-        // Fallback algebraic check
         (typeof from === 'number' && typeof to === 'number'));
 
     const record = game.move({ from, to, promotion });
@@ -183,7 +183,7 @@ export function PuzzlesScreen() {
           </Pressable>
           <View style={styles.streakBadge}>
             <Text style={styles.streakFire}>🔥</Text>
-            <Text style={styles.streakCount}>{streakData.currentStreak} días</Text>
+            <Text style={styles.streakCount}>{streakData.currentStreak} días de racha</Text>
           </View>
         </View>
 
@@ -265,7 +265,7 @@ export function PuzzlesScreen() {
 
         {/* OFFLINE PUZZLE PACK COLLECTION */}
         <View style={styles.packSection}>
-          <Text style={styles.packSectionTitle}>Colección Offline de Tácticas ({filteredPuzzles.length})</Text>
+          <Text style={styles.packSectionTitle}>Colección de Tácticas ({filteredPuzzles.length})</Text>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.themeFilterRow}>
             {['all', 'fork', 'pin', 'mate-in-1', 'mate-in-2', 'discovered-attack', 'win-material', 'endgame'].map((themeKey) => (
@@ -314,10 +314,10 @@ export function PuzzlesScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#09130F',
+    backgroundColor: APP_COLORS.background,
   },
   container: {
-    padding: 16,
+    padding: 14,
     alignItems: 'center',
     gap: 12,
   },
@@ -332,12 +332,12 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
   backButtonText: {
-    color: '#00E5B4',
+    color: APP_COLORS.blueElectric,
     fontSize: 13,
     fontWeight: '800',
   },
@@ -345,29 +345,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#F5C451',
+    borderColor: APP_COLORS.borderGold,
   },
   streakFire: {
-    fontSize: 16,
+    fontSize: 15,
   },
   streakCount: {
-    color: '#F5C451',
-    fontSize: 13,
+    color: APP_COLORS.goldBright,
+    fontSize: 12,
     fontWeight: '900',
   },
   heroCard: {
     width: '100%',
     maxWidth: 440,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 18,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#294235',
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
     gap: 4,
   },
   heroTopRow: {
@@ -376,19 +376,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heroEyebrow: {
-    color: '#00E5B4',
-    fontSize: 11,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-  },
-  completedBadge: {
-    color: '#00E5B4',
+    color: APP_COLORS.blueElectric,
     fontSize: 10,
     fontWeight: '900',
-    backgroundColor: 'rgba(0, 229, 180, 0.15)',
+    letterSpacing: 0.8,
+  },
+  completedBadge: {
+    color: APP_COLORS.goldBright,
+    fontSize: 10,
+    fontWeight: '900',
+    backgroundColor: 'rgba(229, 184, 105, 0.15)',
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: 6,
+    borderWidth: 1,
+    borderColor: APP_COLORS.goldPrimary,
   },
   heroTitle: {
     color: '#FFFFFF',
@@ -396,7 +398,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   heroElo: {
-    color: '#9EAFA5',
+    color: APP_COLORS.textSecondary,
     fontSize: 12,
     fontWeight: '700',
   },
@@ -412,56 +414,57 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
   tierOptionActive: {
-    backgroundColor: '#1E3A2D',
-    borderColor: '#00E5B4',
+    backgroundColor: APP_COLORS.goldPrimary,
+    borderColor: APP_COLORS.goldBright,
   },
   tierIcon: {
     fontSize: 14,
   },
   tierLabel: {
-    color: '#9EAFA5',
+    color: APP_COLORS.textSecondary,
     fontSize: 12,
     fontWeight: '800',
   },
   tierLabelActive: {
-    color: '#FFFFFF',
+    color: '#070B0E',
+    fontWeight: '900',
   },
   statusBanner: {
     width: '100%',
     maxWidth: 440,
-    backgroundColor: '#182C22',
+    backgroundColor: APP_COLORS.surfaceStrong,
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#2D4B3B',
+    borderColor: APP_COLORS.border,
   },
   statusCompleted: {
-    backgroundColor: 'rgba(0, 229, 180, 0.12)',
-    borderColor: '#00E5B4',
+    backgroundColor: 'rgba(0, 230, 118, 0.12)',
+    borderColor: APP_COLORS.success,
   },
   statusFailed: {
-    backgroundColor: 'rgba(255, 77, 77, 0.12)',
-    borderColor: '#FF4D4D',
+    backgroundColor: 'rgba(255, 59, 48, 0.12)',
+    borderColor: APP_COLORS.danger,
   },
   statusText: {
-    color: '#C5D0C9',
+    color: APP_COLORS.textSecondary,
     fontSize: 13,
     fontWeight: '700',
     textAlign: 'center',
   },
   statusTextSuccess: {
-    color: '#00E5B4',
+    color: APP_COLORS.success,
     fontWeight: '800',
   },
   statusTextFailed: {
-    color: '#FF4D4D',
+    color: '#FFBABA',
   },
   boardWrapper: {
     alignItems: 'center',
@@ -475,27 +478,28 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     flex: 1,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
   secondaryButtonText: {
-    color: '#C5D0C9',
+    color: APP_COLORS.textSecondary,
     fontSize: 13,
     fontWeight: '800',
   },
   primaryButton: {
     flex: 1.5,
-    backgroundColor: '#00E5B4',
+    backgroundColor: APP_COLORS.goldPrimary,
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: 'center',
+    boxShadow: '0 4px 14px rgba(229, 184, 105, 0.3)',
   },
   primaryButtonText: {
-    color: '#09130F',
+    color: '#070B0E',
     fontSize: 13,
     fontWeight: '900',
   },
@@ -506,7 +510,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   packSectionTitle: {
-    color: '#FFFFFF',
+    color: APP_COLORS.goldBright,
     fontSize: 14,
     fontWeight: '900',
   },
@@ -515,24 +519,25 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   filterChip: {
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
   filterChipActive: {
-    backgroundColor: '#00E5B4',
-    borderColor: '#00E5B4',
+    backgroundColor: APP_COLORS.blueElectric,
+    borderColor: APP_COLORS.blueElectric,
   },
   filterChipText: {
-    color: '#9EAFA5',
+    color: APP_COLORS.textMuted,
     fontSize: 11,
     fontWeight: '800',
   },
   filterChipTextActive: {
-    color: '#09130F',
+    color: '#070B0E',
+    fontWeight: '900',
   },
   puzzlesList: {
     gap: 6,
@@ -541,15 +546,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
   puzzleListItemActive: {
-    borderColor: '#00E5B4',
-    backgroundColor: '#1B3529',
+    borderColor: APP_COLORS.goldPrimary,
+    backgroundColor: 'rgba(229, 184, 105, 0.1)',
   },
   puzzleListInfo: {
     gap: 2,
@@ -560,12 +565,12 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   puzzleListSub: {
-    color: '#9EAFA5',
+    color: APP_COLORS.textSecondary,
     fontSize: 11,
     fontWeight: '700',
   },
   puzzleListXp: {
-    color: '#F5C451',
+    color: APP_COLORS.goldBright,
     fontSize: 12,
     fontWeight: '900',
   },

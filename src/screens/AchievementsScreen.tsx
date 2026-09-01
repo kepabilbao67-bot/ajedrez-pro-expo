@@ -15,12 +15,13 @@ import {
   type AchievementTier,
 } from '@/gamification/achievements';
 import { usePlayerProgress } from '@/hooks/use-player-progress';
+import { APP_COLORS } from '@/theme/colors';
 
 const TIER_COLORS: Record<AchievementTier, { border: string; bg: string; text: string; label: string }> = {
-  bronze: { border: '#CD7F32', bg: 'rgba(205, 127, 50, 0.12)', text: '#E5A663', label: 'Bronce' },
-  silver: { border: '#C0C0C0', bg: 'rgba(192, 192, 192, 0.12)', text: '#E0E0E0', label: 'Plata' },
-  gold: { border: '#F5C451', bg: 'rgba(245, 196, 81, 0.12)', text: '#F5C451', label: 'Oro' },
-  diamond: { border: '#00C8FF', bg: 'rgba(0, 200, 255, 0.12)', text: '#00C8FF', label: 'Diamante' },
+  bronze: { border: '#CD7F32', bg: 'rgba(205, 127, 50, 0.15)', text: '#E5A663', label: 'Bronce' },
+  silver: { border: '#C0C0C0', bg: 'rgba(192, 192, 192, 0.15)', text: '#E0E0E0', label: 'Plata' },
+  gold: { border: APP_COLORS.goldPrimary, bg: 'rgba(229, 184, 105, 0.15)', text: APP_COLORS.goldBright, label: 'Oro' },
+  diamond: { border: APP_COLORS.blueElectric, bg: 'rgba(0, 210, 255, 0.15)', text: APP_COLORS.blueElectric, label: 'Diamante' },
 };
 
 export function AchievementsScreen() {
@@ -109,7 +110,7 @@ export function AchievementsScreen() {
                 style={[
                   styles.achievementCard,
                   isUnlocked
-                    ? { borderColor: tierStyle.border, backgroundColor: '#16281F' }
+                    ? { borderColor: tierStyle.border, backgroundColor: APP_COLORS.surface }
                     : styles.lockedCard,
                 ]}
               >
@@ -151,8 +152,8 @@ export function AchievementsScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#09130F' },
-  container: { padding: 16, alignItems: 'center', gap: 14 },
+  root: { flex: 1, backgroundColor: APP_COLORS.background },
+  container: { padding: 14, alignItems: 'center', gap: 14 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -164,47 +165,47 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  backButtonText: { color: '#00E5B4', fontSize: 13, fontWeight: '800' },
-  headerTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '900' },
+  backButtonText: { color: APP_COLORS.blueElectric, fontSize: 13, fontWeight: '800' },
+  headerTitle: { color: APP_COLORS.goldBright, fontSize: 18, fontWeight: '900' },
   levelBadge: {
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#00E5B4',
+    borderColor: APP_COLORS.borderGold,
   },
-  levelBadgeText: { color: '#00E5B4', fontSize: 11, fontWeight: '900' },
+  levelBadgeText: { color: APP_COLORS.goldBright, fontSize: 11, fontWeight: '900' },
   heroCard: {
     width: '100%',
     maxWidth: 440,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 20,
     padding: 16,
-    borderWidth: 1,
-    borderColor: '#294235',
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
     gap: 8,
   },
   heroTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  heroEyebrow: { color: '#00E5B4', fontSize: 11, fontWeight: '900', letterSpacing: 0.5 },
-  heroXpText: { color: '#F5C451', fontSize: 12, fontWeight: '900' },
+  heroEyebrow: { color: APP_COLORS.blueElectric, fontSize: 11, fontWeight: '900', letterSpacing: 0.5 },
+  heroXpText: { color: APP_COLORS.goldBright, fontSize: 12, fontWeight: '900' },
   heroProgressHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   heroUnlockedText: { color: '#FFFFFF', fontSize: 16, fontWeight: '900' },
-  heroPercentText: { color: '#00E5B4', fontSize: 18, fontWeight: '900' },
+  heroPercentText: { color: APP_COLORS.blueElectric, fontSize: 18, fontWeight: '900' },
   progressBarBg: {
     height: 8,
-    backgroundColor: '#0E1A14',
+    backgroundColor: APP_COLORS.surfaceStrong,
     borderRadius: 4,
     overflow: 'hidden',
     marginTop: 4,
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#00E5B4',
+    backgroundColor: APP_COLORS.goldPrimary,
     borderRadius: 4,
   },
   filterRow: {
@@ -215,33 +216,33 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   filterChip: {
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  filterChipActive: { backgroundColor: '#00E5B4', borderColor: '#00E5B4' },
-  filterChipText: { color: '#9EAFA5', fontSize: 11, fontWeight: '800' },
-  filterChipTextActive: { color: '#09130F' },
+  filterChipActive: { backgroundColor: APP_COLORS.blueElectric, borderColor: APP_COLORS.blueElectric },
+  filterChipText: { color: APP_COLORS.textMuted, fontSize: 11, fontWeight: '800' },
+  filterChipTextActive: { color: '#070B0E', fontWeight: '900' },
   grid: {
     width: '100%',
     maxWidth: 440,
     gap: 10,
   },
   achievementCard: {
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
     gap: 6,
   },
   lockedCard: {
-    opacity: 0.65,
-    backgroundColor: '#0E1A14',
-    borderColor: '#1F3328',
+    opacity: 0.55,
+    backgroundColor: APP_COLORS.surfaceStrong,
+    borderColor: APP_COLORS.border,
   },
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   iconBox: {
@@ -260,11 +261,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   tierPillText: { fontSize: 9, fontWeight: '900', letterSpacing: 0.5 },
-  xpRewardText: { color: '#F5C451', fontSize: 11, fontWeight: '900' },
+  xpRewardText: { color: APP_COLORS.goldBright, fontSize: 11, fontWeight: '900' },
   achievementTitle: { color: '#FFFFFF', fontSize: 15, fontWeight: '900' },
-  lockedTitle: { color: '#9EAFA5' },
-  achievementDesc: { color: '#C5D0C9', fontSize: 12, lineHeight: 17 },
+  lockedTitle: { color: APP_COLORS.textMuted },
+  achievementDesc: { color: APP_COLORS.textSecondary, fontSize: 12, lineHeight: 17 },
   cardFooter: { marginTop: 4 },
-  unlockedDate: { color: '#00E5B4', fontSize: 11, fontWeight: '800' },
-  lockedLabel: { color: '#6D8276', fontSize: 11, fontWeight: '700' },
+  unlockedDate: { color: APP_COLORS.success, fontSize: 11, fontWeight: '800' },
+  lockedLabel: { color: APP_COLORS.textMuted, fontSize: 11, fontWeight: '700' },
 });

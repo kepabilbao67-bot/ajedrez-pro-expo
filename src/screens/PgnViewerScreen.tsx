@@ -18,6 +18,7 @@ import { MASTER_GAMES, parsePgn, type ParsedPgnGame } from '@/services/pgnExport
 import { useVisualPreferences } from '@/hooks/use-visual-preferences';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useAudioSfx } from '@/hooks/use-audio-sfx';
+import { APP_COLORS } from '@/theme/colors';
 
 export function PgnViewerScreen() {
   const router = useRouter();
@@ -28,14 +29,13 @@ export function PgnViewerScreen() {
 
   const [activeMasterGame, setActiveMasterGame] = useState(MASTER_GAMES[0]);
   const [parsedGame, setParsedGame] = useState<ParsedPgnGame>(() => parsePgn(MASTER_GAMES[0].pgn));
-  const [currentMoveIndex, setCurrentMoveIndex] = useState<number>(0); // 0 = initial pos
+  const [currentMoveIndex, setCurrentMoveIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [pasteModalVisible, setPasteModalVisible] = useState<boolean>(false);
   const [customPgnInput, setCustomPgnInput] = useState<string>('');
 
   const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Build the game state up to currentMoveIndex
   const buildBoardAtStep = (moves: string[], step: number): { position: Position; lastMove: Move | null; inCheck: boolean } => {
     const game = new ChessGame();
     let lastMove: Move | null = null;
@@ -63,10 +63,9 @@ export function PgnViewerScreen() {
 
   const { position, lastMove, inCheck } = buildBoardAtStep(parsedGame.moves, currentMoveIndex);
 
-  const availableWidth = width - 32;
+  const availableWidth = width - 28;
   const boardSize = Math.min(Math.max(availableWidth, 240), 380);
 
-  // Auto-play mechanism
   useEffect(() => {
     if (isPlaying) {
       autoPlayTimerRef.current = setInterval(() => {
@@ -134,7 +133,7 @@ export function PgnViewerScreen() {
           <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.backButton}>
             <Text style={styles.backButtonText}>← Volver</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>Visor y Reproductor PGN</Text>
+          <Text style={styles.headerTitle}>Visor PGN Maestro</Text>
           <Pressable accessibilityRole="button" onPress={() => setPasteModalVisible(true)} style={styles.pasteButton}>
             <Text style={styles.pasteButtonText}>+ Pegar PGN</Text>
           </Pressable>
@@ -202,7 +201,7 @@ export function PgnViewerScreen() {
             onPress={() => setIsPlaying((p) => !p)}
             style={[styles.controlBtn, styles.playPauseBtn]}
           >
-            <Text style={styles.playPauseBtnText}>{isPlaying ? '⏸ Pausa' : '▶ Play'}</Text>
+            <Text style={styles.playPauseBtnText}>{isPlaying ? '⏸ Pausa' : '▶ Reproducir'}</Text>
           </Pressable>
           <Pressable accessibilityRole="button" onPress={goNext} style={styles.controlBtn}>
             <Text style={styles.controlBtnText}>▶</Text>
@@ -260,7 +259,7 @@ export function PgnViewerScreen() {
               multiline
               numberOfLines={8}
               placeholder="[Event &quot;...&quot;]&#10;1. e4 e5 2. Nf3 Nc6..."
-              placeholderTextColor="#6D8276"
+              placeholderTextColor={APP_COLORS.textMuted}
               value={customPgnInput}
               onChangeText={setCustomPgnInput}
               style={styles.pgnInput}
@@ -290,8 +289,8 @@ export function PgnViewerScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#09130F' },
-  container: { padding: 16, alignItems: 'center', gap: 12 },
+  root: { flex: 1, backgroundColor: APP_COLORS.background },
+  container: { padding: 14, alignItems: 'center', gap: 12 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -303,56 +302,56 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  backButtonText: { color: '#00E5B4', fontSize: 13, fontWeight: '800' },
-  headerTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '900' },
+  backButtonText: { color: APP_COLORS.blueElectric, fontSize: 13, fontWeight: '800' },
+  headerTitle: { color: APP_COLORS.goldBright, fontSize: 18, fontWeight: '900' },
   pasteButton: {
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 12,
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surfaceStrong,
     borderWidth: 1,
-    borderColor: '#00E5B4',
+    borderColor: APP_COLORS.borderGold,
   },
-  pasteButtonText: { color: '#00E5B4', fontSize: 12, fontWeight: '800' },
+  pasteButtonText: { color: APP_COLORS.goldBright, fontSize: 12, fontWeight: '800' },
   masterGamesRow: { gap: 8, paddingVertical: 4 },
   masterGameChip: {
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  masterGameChipActive: { backgroundColor: '#00E5B4', borderColor: '#00E5B4' },
-  masterGameChipText: { color: '#9EAFA5', fontSize: 12, fontWeight: '800' },
-  masterGameChipTextActive: { color: '#09130F' },
+  masterGameChipActive: { backgroundColor: APP_COLORS.goldPrimary, borderColor: APP_COLORS.goldBright },
+  masterGameChipText: { color: APP_COLORS.textSecondary, fontSize: 12, fontWeight: '800' },
+  masterGameChipTextActive: { color: '#070B0E', fontWeight: '900' },
   infoCard: {
     width: '100%',
     maxWidth: 440,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
     gap: 4,
   },
   infoTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  infoEvent: { color: '#00E5B4', fontSize: 12, fontWeight: '900' },
+  infoEvent: { color: APP_COLORS.blueElectric, fontSize: 12, fontWeight: '900' },
   resultBadge: {
-    backgroundColor: '#1B3025',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#3B5A49',
+    borderColor: APP_COLORS.borderGold,
   },
-  resultBadgeText: { color: '#F5C451', fontSize: 11, fontWeight: '900' },
+  resultBadgeText: { color: APP_COLORS.goldBright, fontSize: 11, fontWeight: '900' },
   playersText: { color: '#FFFFFF', fontSize: 15, fontWeight: '900' },
-  metaSub: { color: '#9EAFA5', fontSize: 11, marginTop: 2 },
+  metaSub: { color: APP_COLORS.textMuted, fontSize: 11, marginTop: 2 },
   boardWrapper: { alignItems: 'center', justifyContent: 'center' },
   controlsBar: {
     flexDirection: 'row',
@@ -363,47 +362,47 @@ const styles = StyleSheet.create({
     maxWidth: 440,
   },
   controlBtn: {
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  controlBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '900' },
+  controlBtnText: { color: APP_COLORS.blueElectric, fontSize: 13, fontWeight: '900' },
   playPauseBtn: {
-    backgroundColor: '#00E5B4',
-    borderColor: '#00E5B4',
+    backgroundColor: APP_COLORS.goldPrimary,
+    borderColor: APP_COLORS.goldBright,
     paddingHorizontal: 18,
   },
-  playPauseBtnText: { color: '#09130F', fontSize: 13, fontWeight: '900' },
-  moveCounterText: { color: '#9EAFA5', fontSize: 12, fontWeight: '700' },
+  playPauseBtnText: { color: '#070B0E', fontSize: 13, fontWeight: '900' },
+  moveCounterText: { color: APP_COLORS.textSecondary, fontSize: 12, fontWeight: '700' },
   movesListCard: {
     width: '100%',
     maxWidth: 440,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
     gap: 8,
   },
-  movesListTitle: { color: '#FFFFFF', fontSize: 13, fontWeight: '900' },
+  movesListTitle: { color: APP_COLORS.goldBright, fontSize: 13, fontWeight: '900' },
   movesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   moveItem: {
-    backgroundColor: '#1B3025',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
   moveItemActive: {
-    backgroundColor: '#00E5B4',
+    backgroundColor: APP_COLORS.goldPrimary,
   },
-  moveItemText: { color: '#C5D0C9', fontSize: 12, fontWeight: '700' },
-  moveItemTextActive: { color: '#09130F', fontWeight: '900' },
+  moveItemText: { color: APP_COLORS.textSecondary, fontSize: 12, fontWeight: '700' },
+  moveItemTextActive: { color: '#070B0E', fontWeight: '900' },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(5, 12, 9, 0.85)',
+    backgroundColor: 'rgba(4, 6, 8, 0.88)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -411,20 +410,20 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 420,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 20,
     padding: 18,
-    borderWidth: 1,
-    borderColor: '#345242',
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
     gap: 10,
   },
-  modalTitle: { color: '#FFFFFF', fontSize: 18, fontWeight: '900' },
-  modalSub: { color: '#9EAFA5', fontSize: 12 },
+  modalTitle: { color: APP_COLORS.goldBright, fontSize: 18, fontWeight: '900' },
+  modalSub: { color: APP_COLORS.textSecondary, fontSize: 12 },
   pgnInput: {
-    backgroundColor: '#0E1A14',
+    backgroundColor: APP_COLORS.surfaceStrong,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
     color: '#FFFFFF',
     padding: 12,
     fontSize: 12,
@@ -435,18 +434,20 @@ const styles = StyleSheet.create({
   modalBtnRow: { flexDirection: 'row', gap: 10, marginTop: 6 },
   modalCancelBtn: {
     flex: 1,
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingVertical: 10,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
     alignItems: 'center',
   },
-  modalCancelText: { color: '#C5D0C9', fontSize: 13, fontWeight: '800' },
+  modalCancelText: { color: APP_COLORS.textSecondary, fontSize: 13, fontWeight: '800' },
   modalSubmitBtn: {
     flex: 1.5,
-    backgroundColor: '#00E5B4',
+    backgroundColor: APP_COLORS.goldPrimary,
     paddingVertical: 10,
     borderRadius: 12,
     alignItems: 'center',
   },
-  modalSubmitText: { color: '#09130F', fontSize: 13, fontWeight: '900' },
+  modalSubmitText: { color: '#070B0E', fontSize: 13, fontWeight: '900' },
 });

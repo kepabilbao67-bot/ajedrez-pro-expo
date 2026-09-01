@@ -6,20 +6,22 @@ export function renderModernPiece(piece: Piece, size: number): React.ReactElemen
   const isWhite = colorOf(piece) === 'w';
   const type = typeOf(piece);
 
-  const fillMain = isWhite ? 'url(#modern-w-grad)' : 'url(#modern-b-grad)';
-  const strokeColor = isWhite ? '#0B131D' : '#04070B';
-  const accentColor = isWhite ? '#00E5B4' : '#F2C94C';
+  const fillMain = isWhite ? 'url(#modern-gold-grad)' : 'url(#modern-obsidian-grad)';
+  const strokeColor = isWhite ? '#785208' : '#03080E';
+  const accentColor = isWhite ? '#00D2FF' : '#E5B869';
 
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <Defs>
-        <LinearGradient id="modern-w-grad" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0%" stopColor="#FFFFFF" />
-          <Stop offset="100%" stopColor="#E6EEF8" />
+        <LinearGradient id="modern-gold-grad" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0%" stopColor="#FFF2B2" />
+          <Stop offset="50%" stopColor="#E5B842" />
+          <Stop offset="100%" stopColor="#9E7422" />
         </LinearGradient>
-        <LinearGradient id="modern-b-grad" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0%" stopColor="#253241" />
-          <Stop offset="100%" stopColor="#101721" />
+        <LinearGradient id="modern-obsidian-grad" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0%" stopColor="#2A3C4D" />
+          <Stop offset="60%" stopColor="#101924" />
+          <Stop offset="100%" stopColor="#04080E" />
         </LinearGradient>
       </Defs>
 
@@ -33,10 +35,10 @@ export function renderModernPiece(piece: Piece, size: number): React.ReactElemen
           rx="4"
           fill={fillMain}
           stroke={strokeColor}
-          strokeWidth="3"
+          strokeWidth="2.6"
         />
         {/* Modern accent stripe on base */}
-        <Rect x="30" y="86" width="40" height="3" rx="1.5" fill={accentColor} />
+        <Rect x="30" y="86.5" width="40" height="3" rx="1.5" fill={accentColor} />
 
         {/* Piece specific geometric shapes */}
         {type === 'p' && (
@@ -46,10 +48,10 @@ export function renderModernPiece(piece: Piece, size: number): React.ReactElemen
               points="50,22 32,82 68,82"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="3"
+              strokeWidth="2.6"
               strokeLinejoin="round"
             />
-            <Circle cx="50" cy="36" r="6" fill={accentColor} stroke={strokeColor} strokeWidth="2.5" />
+            <Circle cx="50" cy="36" r="6" fill={accentColor} stroke={strokeColor} strokeWidth="2" />
           </G>
         )}
 
@@ -60,7 +62,7 @@ export function renderModernPiece(piece: Piece, size: number): React.ReactElemen
               points="30,82 34,42 26,42 26,22 40,22 40,32 60,32 60,22 74,22 74,42 66,42 70,82"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="3"
+              strokeWidth="2.6"
               strokeLinejoin="round"
             />
             {/* Horizontal modern slit */}
@@ -75,13 +77,13 @@ export function renderModernPiece(piece: Piece, size: number): React.ReactElemen
               points="28,82 24,52 38,36 34,18 54,26 68,40 72,82"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="3"
+              strokeWidth="2.6"
               strokeLinejoin="round"
             />
             <Polygon
               points="24,52 42,48 50,60 36,66"
               fill={accentColor}
-              opacity="0.85"
+              opacity="0.9"
             />
             <Circle cx="44" cy="34" r="3.5" fill={strokeColor} />
           </G>
@@ -94,11 +96,11 @@ export function renderModernPiece(piece: Piece, size: number): React.ReactElemen
               points="50,14 68,38 58,82 42,82 32,38"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="3"
+              strokeWidth="2.6"
               strokeLinejoin="round"
             />
             {/* Bishop cross slit */}
-            <Path d="M 50 26 L 50 56 M 40 38 L 60 38" stroke={accentColor} strokeWidth="3.5" strokeLinecap="round" />
+            <Path d="M 50 26 L 50 56 M 40 38 L 60 38" stroke={accentColor} strokeWidth="3" strokeLinecap="round" />
           </G>
         )}
 
@@ -109,7 +111,7 @@ export function renderModernPiece(piece: Piece, size: number): React.ReactElemen
               points="30,82 36,46 22,30 40,40 50,16 60,40 78,30 64,46 70,82"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="3"
+              strokeWidth="2.6"
               strokeLinejoin="round"
             />
             <Circle cx="50" cy="54" r="5" fill={accentColor} stroke={strokeColor} strokeWidth="2" />
@@ -123,14 +125,14 @@ export function renderModernPiece(piece: Piece, size: number): React.ReactElemen
               points="32,82 36,42 28,34 50,26 72,34 64,42 68,82"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="3"
+              strokeWidth="2.6"
               strokeLinejoin="round"
             />
             {/* Modern top cross */}
             <Path
               d="M 50 10 L 50 24 M 42 16 L 58 16"
               stroke={accentColor}
-              strokeWidth="4"
+              strokeWidth="3.5"
               strokeLinecap="round"
             />
           </G>

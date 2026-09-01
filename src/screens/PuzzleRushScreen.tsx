@@ -28,6 +28,7 @@ import { useVisualPreferences } from '@/hooks/use-visual-preferences';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useAudioSfx } from '@/hooks/use-audio-sfx';
 import { usePlayerProgress } from '@/hooks/use-player-progress';
+import { APP_COLORS } from '@/theme/colors';
 
 export function PuzzleRushScreen() {
   const router = useRouter();
@@ -59,7 +60,6 @@ export function PuzzleRushScreen() {
   const modeRef = useRef<PuzzleRushMode>(mode);
   const isEndingRef = useRef<boolean>(false);
 
-  // Load records on mount
   useEffect(() => {
     loadPuzzleRushRecords().then(setRecords).catch(() => {});
   }, []);
@@ -116,7 +116,6 @@ export function PuzzleRushScreen() {
     setIsPlaying(true);
   };
 
-  // Robust timer loop with target time calculation
   useEffect(() => {
     if (!isPlaying) {
       if (timerRef.current) {
@@ -176,7 +175,6 @@ export function PuzzleRushScreen() {
         const record = testGame.move(candidate);
 
         if (record) {
-          // Check if candidate matches any step of puzzle solution
           const isCorrect = currentPuzzle.solution.some((sol) => {
             const fromSq = typeof sol.from === 'number' ? sol.from : candidate.from;
             const toSq = typeof sol.to === 'number' ? sol.to : candidate.to;
@@ -184,7 +182,6 @@ export function PuzzleRushScreen() {
           });
 
           if (isCorrect) {
-            // Apply move and advance
             game.move(candidate);
             setLastMove(candidate);
             hapticMove();
@@ -201,7 +198,6 @@ export function PuzzleRushScreen() {
             }, 300);
             return;
           } else {
-            // Incorrect move
             strikesRef.current += 1;
             const nextStrikes = strikesRef.current;
             setStrikes(nextStrikes);
@@ -231,7 +227,7 @@ export function PuzzleRushScreen() {
     setSelectedSquare(null);
   };
 
-  const availableWidth = width - 32;
+  const availableWidth = width - 28;
   const boardSize = Math.min(Math.max(availableWidth, 240), 380);
 
   const getRecordForMode = (m: PuzzleRushMode) => {
@@ -248,7 +244,7 @@ export function PuzzleRushScreen() {
           <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.backButton}>
             <Text style={styles.backButtonText}>← Volver</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>Puzzle Rush Contrarreloj</Text>
+          <Text style={styles.headerTitle}>Puzzle Rush</Text>
           <View style={styles.recordBadge}>
             <Text style={styles.recordBadgeText}>🏆 {getRecordForMode(mode)}</Text>
           </View>
@@ -286,10 +282,12 @@ export function PuzzleRushScreen() {
               {formatRushTime(timeLeft)}
             </Text>
           </View>
+          <View style={styles.dashDivider} />
           <View style={styles.dashStatBox}>
             <Text style={styles.dashLabel}>PUNTOS</Text>
             <Text style={[styles.dashValue, styles.scoreValue]}>{score}</Text>
           </View>
+          <View style={styles.dashDivider} />
           <View style={styles.dashStatBox}>
             <Text style={styles.dashLabel}>VIDAS</Text>
             <Text style={styles.strikesText}>
@@ -332,7 +330,7 @@ export function PuzzleRushScreen() {
               onPress={() => startSession(mode)}
               style={({ pressed }) => [styles.startButton, pressed && styles.pressed]}
             >
-              <Text style={styles.startButtonText}>¡INICIAR PUZZLE RUSH!</Text>
+              <Text style={styles.startButtonText}>⚡ ¡INICIAR PUZZLE RUSH!</Text>
             </Pressable>
           ) : (
             <Pressable
@@ -404,8 +402,8 @@ export function PuzzleRushScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#09130F' },
-  container: { padding: 16, alignItems: 'center', gap: 12 },
+  root: { flex: 1, backgroundColor: APP_COLORS.background },
+  container: { padding: 14, alignItems: 'center', gap: 12 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -417,21 +415,21 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 12,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
-  backButtonText: { color: '#00E5B4', fontSize: 13, fontWeight: '800' },
-  headerTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '900' },
+  backButtonText: { color: APP_COLORS.blueElectric, fontSize: 13, fontWeight: '800' },
+  headerTitle: { color: APP_COLORS.goldBright, fontSize: 18, fontWeight: '900' },
   recordBadge: {
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surface,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#F5C451',
+    borderColor: APP_COLORS.borderGold,
   },
-  recordBadgeText: { color: '#F5C451', fontSize: 12, fontWeight: '900' },
+  recordBadgeText: { color: APP_COLORS.goldBright, fontSize: 12, fontWeight: '900' },
   modeTabsRow: {
     flexDirection: 'row',
     gap: 6,
@@ -440,67 +438,70 @@ const styles = StyleSheet.create({
   },
   modeTab: {
     flex: 1,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
   },
   modeTabActive: {
-    backgroundColor: '#00E5B4',
-    borderColor: '#00E5B4',
+    backgroundColor: APP_COLORS.goldPrimary,
+    borderColor: APP_COLORS.goldBright,
   },
-  modeTabText: { color: '#9EAFA5', fontSize: 12, fontWeight: '800' },
-  modeTabTextActive: { color: '#09130F', fontWeight: '900' },
+  modeTabText: { color: APP_COLORS.textSecondary, fontSize: 12, fontWeight: '800' },
+  modeTabTextActive: { color: '#070B0E', fontWeight: '900' },
   dashboardCard: {
     width: '100%',
     maxWidth: 440,
     flexDirection: 'row',
-    backgroundColor: '#14241D',
-    borderRadius: 16,
+    backgroundColor: APP_COLORS.surface,
+    borderRadius: 18,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#294235',
+    borderColor: APP_COLORS.border,
     justifyContent: 'space-around',
+    alignItems: 'center',
   },
   dashStatBox: { alignItems: 'center', gap: 2 },
-  dashLabel: { color: '#9EAFA5', fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
+  dashDivider: { width: 1, height: 26, backgroundColor: APP_COLORS.border },
+  dashLabel: { color: APP_COLORS.textMuted, fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
   dashValue: { color: '#FFFFFF', fontSize: 20, fontWeight: '900', fontVariant: ['tabular-nums'] },
-  dashValueUrgent: { color: '#FF4D4D' },
-  scoreValue: { color: '#00E5B4' },
-  strikesText: { fontSize: 14, marginTop: 2 },
+  dashValueUrgent: { color: APP_COLORS.danger },
+  scoreValue: { color: APP_COLORS.blueElectric },
+  strikesText: { fontSize: 13, marginTop: 2 },
   turnBanner: {
-    backgroundColor: '#16281F',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#254433',
+    borderColor: APP_COLORS.border,
   },
-  turnBannerText: { color: '#F6E6BD', fontSize: 12, fontWeight: '800' },
+  turnBannerText: { color: APP_COLORS.goldBright, fontSize: 12, fontWeight: '800' },
   boardWrapper: { alignItems: 'center', justifyContent: 'center' },
   controlsSection: { width: '100%', maxWidth: 440, marginTop: 4 },
   startButton: {
-    backgroundColor: '#D6A943',
+    backgroundColor: APP_COLORS.goldPrimary,
     paddingVertical: 14,
     borderRadius: 16,
     alignItems: 'center',
+    boxShadow: '0 6px 18px rgba(229, 184, 105, 0.35)',
   },
-  startButtonText: { color: '#162019', fontSize: 15, fontWeight: '900', letterSpacing: 0.5 },
+  startButtonText: { color: '#070B0E', fontSize: 15, fontWeight: '900', letterSpacing: 0.5 },
   stopButton: {
-    backgroundColor: '#321B17',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingVertical: 12,
     borderRadius: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#A84737',
+    borderColor: APP_COLORS.danger,
   },
-  stopButtonText: { color: '#FFD8CF', fontSize: 13, fontWeight: '800' },
+  stopButtonText: { color: '#FFBABA', fontSize: 13, fontWeight: '800' },
   pressed: { opacity: 0.75, transform: [{ scale: 0.985 }] },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(5, 12, 9, 0.85)',
+    backgroundColor: 'rgba(4, 6, 8, 0.88)',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -508,53 +509,57 @@ const styles = StyleSheet.create({
   modalCard: {
     width: '100%',
     maxWidth: 400,
-    backgroundColor: '#14241D',
+    backgroundColor: APP_COLORS.surface,
     borderRadius: 24,
     padding: 24,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#345242',
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
     gap: 12,
   },
   modalTrophy: { fontSize: 44 },
-  modalTitle: { color: '#FFFFFF', fontSize: 20, fontWeight: '900' },
+  modalTitle: { color: APP_COLORS.goldBright, fontSize: 20, fontWeight: '900' },
   newRecordBadge: {
-    backgroundColor: 'rgba(245, 196, 81, 0.15)',
+    backgroundColor: 'rgba(229, 184, 105, 0.15)',
     borderWidth: 1,
-    borderColor: '#F5C451',
+    borderColor: APP_COLORS.goldPrimary,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 10,
   },
-  newRecordBadgeText: { color: '#F5C451', fontSize: 12, fontWeight: '900' },
+  newRecordBadgeText: { color: APP_COLORS.goldBright, fontSize: 12, fontWeight: '900' },
   modalScoresRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    paddingVertical: 10,
-    backgroundColor: '#0E1A14',
+    paddingVertical: 12,
+    backgroundColor: APP_COLORS.surfaceStrong,
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
   },
   modalScoreCol: { alignItems: 'center', gap: 4 },
-  modalScoreLabel: { color: '#9EAFA5', fontSize: 11, fontWeight: '700' },
-  modalScoreNum: { color: '#00E5B4', fontSize: 26, fontWeight: '900' },
-  modalRecordNum: { color: '#F5C451', fontSize: 26, fontWeight: '900' },
-  modalXpReward: { color: '#00E5B4', fontSize: 13, fontWeight: '800' },
+  modalScoreLabel: { color: APP_COLORS.textMuted, fontSize: 11, fontWeight: '700' },
+  modalScoreNum: { color: APP_COLORS.blueElectric, fontSize: 26, fontWeight: '900' },
+  modalRecordNum: { color: APP_COLORS.goldBright, fontSize: 26, fontWeight: '900' },
+  modalXpReward: { color: APP_COLORS.goldBright, fontSize: 13, fontWeight: '800' },
   modalBtnRow: { flexDirection: 'row', gap: 10, width: '100%', marginTop: 8 },
   modalPrimaryBtn: {
     flex: 1.5,
-    backgroundColor: '#00E5B4',
+    backgroundColor: APP_COLORS.goldPrimary,
     paddingVertical: 12,
     borderRadius: 14,
     alignItems: 'center',
   },
-  modalPrimaryBtnText: { color: '#09130F', fontSize: 14, fontWeight: '900' },
+  modalPrimaryBtnText: { color: '#070B0E', fontSize: 14, fontWeight: '900' },
   modalSecondaryBtn: {
     flex: 1,
-    backgroundColor: '#1E3529',
+    backgroundColor: APP_COLORS.surfaceStrong,
     paddingVertical: 12,
     borderRadius: 14,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
     alignItems: 'center',
   },
-  modalSecondaryBtnText: { color: '#C5D0C9', fontSize: 14, fontWeight: '800' },
+  modalSecondaryBtnText: { color: APP_COLORS.textSecondary, fontSize: 14, fontWeight: '800' },
 });
