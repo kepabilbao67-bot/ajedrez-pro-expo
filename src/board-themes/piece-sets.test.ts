@@ -8,13 +8,14 @@ const ALL_PIECES: readonly Piece[] = [
   'k', 'q', 'r', 'b', 'n', 'p',
 ];
 
-describe('Piece Sets Architecture (Sprint Visual 2)', () => {
-  it('defines 3 distinct canonical collections', () => {
-    expect(PIECE_SETS).toHaveLength(3);
+describe('Piece Sets Architecture & Readability', () => {
+  it('defines 4 distinct canonical collections', () => {
+    expect(PIECE_SETS).toHaveLength(4);
     const ids = PIECE_SETS.map((s) => s.id);
     expect(ids).toContain('staunton');
     expect(ids).toContain('modern');
     expect(ids).toContain('3d-realistic');
+    expect(ids).toContain('kids-classic');
   });
 
   it('each collection contains valid rendering functions for all 12 pieces', () => {
@@ -22,9 +23,10 @@ describe('Piece Sets Architecture (Sprint Visual 2)', () => {
       for (const piece of ALL_PIECES) {
         const element = set.renderPiece(piece, 48);
         expect(React.isValidElement(element)).toBe(true);
-        const props = (element as React.ReactElement<{ width?: number; height?: number }>).props;
+        const props = (element as React.ReactElement<{ width?: number; height?: number; viewBox?: string }>).props;
         expect(props.width).toBe(48);
         expect(props.height).toBe(48);
+        expect(props.viewBox).toBe('0 0 100 100');
       }
     }
   });
@@ -53,5 +55,13 @@ describe('Piece Sets Architecture (Sprint Visual 2)', () => {
     expect(stauntonKnight).not.toEqual(modernKnight);
     expect(stauntonKnight).not.toEqual(realisticKnight);
     expect(modernKnight).not.toEqual(realisticKnight);
+  });
+
+  it('validates rendering for all 6 white and 6 black pieces in Staunton default set', () => {
+    const staunton = pieceSetById('staunton');
+    for (const p of ALL_PIECES) {
+      const rendered = staunton.renderPiece(p, 56);
+      expect(React.isValidElement(rendered)).toBe(true);
+    }
   });
 });

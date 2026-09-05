@@ -23,6 +23,10 @@ export const DEFAULT_VISUAL_PREFERENCES: VisualPreferences = {
 
 const VALID_BOARD_THEMES = new Set<BoardThemeId>([
   'classic',
+  'walnut',
+  'marble',
+  'fide-blue',
+  'dark-neon',
   'neon-cyber',
   'glass',
   'medieval',

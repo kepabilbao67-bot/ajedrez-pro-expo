@@ -1,18 +1,29 @@
 import { describe, expect, it } from 'vitest';
-import { boardThemeById } from './board-themes';
+import { BOARD_THEMES, boardThemeById } from './board-themes';
 
-describe('Board Themes HD V1.3', () => {
-  it('contains the 5 flagship HD themes with valid color values', () => {
-    const flagshipIds = ['classic', 'walnut', 'marble', 'fide-blue', 'dark-neon'] as const;
-
-    for (const id of flagshipIds) {
-      const theme = boardThemeById(id);
+describe('Board Themes HD & Readability', () => {
+  it('contains valid hex color values for all registered themes', () => {
+    for (const theme of BOARD_THEMES) {
       expect(theme).toBeDefined();
-      expect(theme.id).toBe(id);
+      expect(theme.name.length).toBeGreaterThan(0);
       expect(theme.lightSquare).toMatch(/^#[0-9A-Fa-f]{6}$/);
       expect(theme.darkSquare).toMatch(/^#[0-9A-Fa-f]{6}$/);
-      expect(theme.name.length).toBeGreaterThan(0);
+      expect(theme.coordinateLight).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      expect(theme.coordinateDark).toMatch(/^#[0-9A-Fa-f]{6}$/);
+      expect(theme.frame).toBeDefined();
+      expect(theme.lastMove).toBeDefined();
+      expect(theme.selected).toBeDefined();
+      expect(theme.legalMove).toBeDefined();
     }
+  });
+
+  it('default flagship theme classic has high contrast between light and dark squares', () => {
+    const classic = boardThemeById('classic');
+    expect(classic.id).toBe('classic');
+    expect(classic.lightSquare).toBe('#96B0C6');
+    expect(classic.darkSquare).toBe('#1B2A38');
+    expect(classic.coordinateLight).toBe('#152A3D');
+    expect(classic.coordinateDark).toBe('#D6E3EF');
   });
 
   it('falls back to default theme if unknown ID passed', () => {

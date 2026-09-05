@@ -5,6 +5,7 @@ export type PieceSetId =
   | 'staunton'
   | 'modern'
   | '3d-realistic'
+  | 'kids-classic'
   // Legacy aliases for backward compatibility:
   | 'classic'
   | '3d'
@@ -13,7 +14,7 @@ export type PieceSetId =
 
 export interface PieceSetDefinition {
   readonly id: PieceSetId;
-  readonly canonicalId: 'staunton' | 'modern' | '3d-realistic';
+  readonly canonicalId: 'staunton' | 'modern' | '3d-realistic' | 'kids-classic';
   readonly name: string;
   readonly description: string;
   readonly availability: 'free' | 'prepared';

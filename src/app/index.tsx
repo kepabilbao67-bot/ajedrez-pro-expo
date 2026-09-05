@@ -1,17 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { difficultyDefinition } from '@/ai/difficulty';
-import type { PromotionPiece, Square } from '@/chess';
+import type { Color, Move, PromotionPiece, Square } from '@/chess';
 import { ChessBoard } from '@/components/chess-board';
 import { CoachPanel } from '@/components/coach-panel';
-import { GameOverModal } from '@/components/game-over-modal';
+import { GameOverModal, type GameOverCareerContext } from '@/components/game-over-modal';
 import { HistoryPanel } from '@/components/history-panel';
 import { OnboardingScreen } from '@/components/onboarding-screen';
 import { PostGamePanel } from '@/components/post-game-panel';
 import { EvalBar } from '@/components/eval-bar';
+import { VariantsModal } from '@/components/variants-modal';
+import type { ChessVariantId } from '@/variants/variants-catalog';
+import {
+  checkKingOfTheHillOutcome,
+  createInitialThreeCheckState,
+  processThreeCheckMove,
+  type ThreeCheckState,
+} from '@/variants/variant-referee';
 
 import { ProfilePanel } from '@/components/profile-panel';
 import { PuzzleRushPanel } from '@/components/puzzle-rush-panel';
@@ -30,17 +38,29 @@ import { useHaptics } from '@/hooks/use-haptics';
 import { useAudioSfx } from '@/hooks/use-audio-sfx';
 import { usePuzzleRush } from '@/hooks/use-puzzle-rush';
 import { useChessStats } from '@/hooks/use-chess-stats';
+import { useCareer } from '@/hooks/use-career';
+import { useGameClock } from '@/hooks/use-game-clock';
+import { GameClockDisplay } from '@/components/game-clock-display';
+import { TIME_CONTROL_PRESETS } from '@/clock/clock-presets';
+import { getOpponentById } from '@/career/opponents';
+import type { CareerOpponent } from '@/career/career-types';
 import { AI_BOTS } from '@/ai/bots';
 import type { AiBot } from '@/ai/bots';
 import type { TrainingPuzzle } from '@/training/training-types';
 import { AnalysisEngine, type AdvantageEvaluation } from '@/services/analysisEngine';
 import { detectOpening } from '@/services/openingBook';
 import { extractMistakesFromGame, mistakeToTrainingPuzzle } from '@/services/mistakeTrainer';
+import type { GameEndReason } from '@/config/gameEndMessages';
 import { APP_COLORS } from '@/theme/colors';
 
 type GameMode = 'local' | 'ai' | 'rush';
 type AppSection = 'home' | 'play';
 type HomeActionType =
+  | 'career'
+  | 'school'
+  | 'store'
+  | 'collection'
+  | 'profile-editor'
   | 'play'
   | 'training'
   | 'settings'
@@ -49,11 +69,37 @@ type HomeActionType =
   | 'openings'
   | 'pgn-viewer'
   | 'achievements'
-  | 'puzzle-rush';
+  | 'puzzle-rush'
+  | 'variants';
+
+function pickRandomPuzzle(puzzles: readonly TrainingPuzzle[]): TrainingPuzzle {
+  return puzzles[Math.floor(Math.random() * puzzles.length)];
+}
 
 export default function Index() {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    careerMatch?: string;
+    opponentId?: string;
+    playerColor?: string;
+    variant?: string;
+  }>();
+  const career = useCareer();
   const { width, height } = useWindowDimensions();
+
+  const [activeVariant, setActiveVariant] = useState<ChessVariantId>('classic');
+  const [threeCheckState, setThreeCheckState] = useState<ThreeCheckState>(() => createInitialThreeCheckState());
+  const [variantsModalVisible, setVariantsModalVisible] = useState(false);
+  const activeVariantRef = useRef<ChessVariantId>('classic');
+  const threeCheckStateRef = useRef<ThreeCheckState>(createInitialThreeCheckState());
+
+  useEffect(() => {
+    activeVariantRef.current = activeVariant;
+  }, [activeVariant]);
+
+  useEffect(() => {
+    threeCheckStateRef.current = threeCheckState;
+  }, [threeCheckState]);
 
   const {
     game,
@@ -74,6 +120,27 @@ export default function Index() {
     selectPieceSquare,
   } = useChessGame();
 
+  const checkVariantRules = (move: Move, movedColor: Color, nextPosition: typeof position) => {
+    const variant = activeVariantRef.current;
+    if (variant === 'three_check') {
+      const res = processThreeCheckMove(threeCheckStateRef.current, nextPosition, movedColor);
+      threeCheckStateRef.current = res.nextState;
+      setThreeCheckState(res.nextState);
+      if (res.outcome.isGameOver && res.outcome.reason === 'three_check') {
+        const isPlayerWhite = params.playerColor !== 'b';
+        const isPlayerWinner = res.outcome.winner === (isPlayerWhite ? 'w' : 'b');
+        setManualGameEndReason(isPlayerWinner ? 'three-check-win' : 'three-check-loss');
+      }
+    } else if (variant === 'king_of_the_hill') {
+      const outcome = checkKingOfTheHillOutcome(nextPosition, move);
+      if (outcome.isGameOver && outcome.reason === 'king_of_the_hill') {
+        const isPlayerWhite = params.playerColor !== 'b';
+        const isPlayerWinner = outcome.winner === (isPlayerWhite ? 'w' : 'b');
+        setManualGameEndReason(isPlayerWinner ? 'koth-win' : 'koth-loss');
+      }
+    }
+  };
+
   const {
     difficulty,
     setDifficulty,
@@ -88,6 +155,8 @@ export default function Index() {
     onMoveApplied: (record, targetGame) => {
       refresh(record, targetGame);
       playMoveHaptics(record.san);
+      const aiColor: Color = targetGame.getPosition().turn === 'w' ? 'b' : 'w';
+      checkVariantRules(record.move, aiColor, targetGame.getPosition());
     },
   });
 
@@ -136,6 +205,50 @@ export default function Index() {
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [section, setSection] = useState<AppSection>('home');
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(true);
+  const [manualGameEndReason, setManualGameEndReason] = useState<GameEndReason | null>(null);
+
+  // Time control & Game Clock
+  const selectedTimeControl = TIME_CONTROL_PRESETS[0];
+  const gameClock = useGameClock({
+    initialPreset: selectedTimeControl,
+    isGameOver: status.gameOver || manualGameEndReason !== null,
+    onTimeout: (flaggedSide) => {
+      const isPlayerWhite = params.playerColor !== 'b';
+      const playerFlagged = isPlayerWhite ? flaggedSide === 'w' : flaggedSide === 'b';
+      setManualGameEndReason(playerFlagged ? 'timeout-loss' : 'timeout-win');
+    },
+    enabledSounds: visualPreferences.soundsEnabled,
+  });
+
+  // Career match state
+  const [isCareerGame, setIsCareerGame] = useState<boolean>(false);
+  const [careerOpponentState, setCareerOpponentState] = useState<CareerOpponent | null>(null);
+  const [careerOutcomeContext, setCareerOutcomeContext] = useState<GameOverCareerContext | null>(null);
+
+  // Handle career match launch from /career screen
+  useEffect(() => {
+    if (params.careerMatch === 'true' && params.opponentId) {
+      const opp = getOpponentById(params.opponentId);
+      if (opp) {
+        queueMicrotask(() => {
+          setIsCareerGame(true);
+          setCareerOpponentState(opp);
+          setMode('ai');
+          setDifficulty(opp.aiDifficulty);
+          setPlayStyle(opp.playStyle);
+          setSection('play');
+          setCareerOutcomeContext(null);
+          resetChessGame();
+        });
+
+        if (params.playerColor === 'b') {
+          setTimeout(() => {
+            void requestAiMove(game);
+          }, 450);
+        }
+      }
+    }
+  }, [params.careerMatch, params.opponentId, params.playerColor, game, requestAiMove, resetChessGame, setDifficulty, setPlayStyle]);
 
   const [liveEval, setLiveEval] = useState<AdvantageEvaluation>({
     scoreCp: 0,
@@ -200,12 +313,13 @@ export default function Index() {
 
   const startPuzzle = (puzzle: TrainingPuzzle) => {
     cancelAi();
+    setManualGameEndReason(null);
     const puzzleGame = initPuzzleSession(puzzle);
     resetChessGame(puzzleGame);
   };
 
   const nextRushPuzzle = () => {
-    const randomPuzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
+    const randomPuzzle = pickRandomPuzzle(puzzles);
     startPuzzle(randomPuzzle);
   };
 
@@ -218,15 +332,81 @@ export default function Index() {
     }
   };
 
+  const handleResetGame = () => {
+    setManualGameEndReason(null);
+    setThreeCheckState(createInitialThreeCheckState());
+    threeCheckStateRef.current = createInitialThreeCheckState();
+    resetGame();
+  };
+
+  const handleResignGame = () => {
+    setManualGameEndReason('resignation-loss');
+  };
+
   useEffect(() => {
-    if (!status.gameOver || completedGameGeneration.current === generationRef.current) return;
-    const result = status.draw || !status.winner ? 'draw' : status.winner === 'w' ? 'win' : 'loss';
+    const isGameOver = status.gameOver || manualGameEndReason !== null;
+    if (!isGameOver || completedGameGeneration.current === generationRef.current) return;
+    const isPlayerWhite = params.playerColor !== 'b';
+    const winningColor = isPlayerWhite ? 'w' : 'b';
+    const isPlayerWin =
+      (status.checkmate && status.winner === winningColor) ||
+      manualGameEndReason === 'resignation-win' ||
+      manualGameEndReason === 'timeout-win' ||
+      manualGameEndReason === 'three-check-win' ||
+      manualGameEndReason === 'koth-win';
+
+    if (isPlayerWin) {
+      playVictory();
+      hapticVictory();
+    }
+    const result =
+      (status.draw || !status.winner) && !manualGameEndReason
+        ? 'draw'
+        : isPlayerWin
+        ? 'win'
+        : 'loss';
+
     recordCompletedGame(result, status.checkmate, coachReport);
     if (mode === 'local' || mode === 'ai') {
-      void recordGameStat(status.winner === 'w');
+      void recordGameStat(result === 'win');
     }
+
+    if (isCareerGame && careerOutcomeContext === null) {
+      career
+        .applyMatchResult(result)
+        .then((res) => {
+          setCareerOutcomeContext({
+            oldRating: res.oldRating,
+            newRating: res.newRating,
+            ratingDelta: res.ratingDelta,
+            tournamentName: career.profile.currentTournament.name,
+            currentStandingPos: res.playerRankPosition,
+            round: career.profile.currentTournament.currentRound,
+            totalRounds: career.profile.currentTournament.totalRounds,
+          });
+        })
+        .catch(() => {});
+    }
+
     completedGameGeneration.current = generationRef.current;
-  }, [coachReport, generationRef, recordCompletedGame, status.checkmate, status.draw, status.gameOver, status.winner, mode, recordGameStat]);
+  }, [
+    coachReport,
+    generationRef,
+    recordCompletedGame,
+    status.checkmate,
+    status.draw,
+    status.gameOver,
+    status.winner,
+    mode,
+    recordGameStat,
+    manualGameEndReason,
+    playVictory,
+    hapticVictory,
+    isCareerGame,
+    careerOutcomeContext,
+    career,
+    params.playerColor,
+  ]);
 
   const handleSquarePress = (square: Square) => {
     if (selected !== null) {
@@ -257,9 +437,11 @@ export default function Index() {
         return;
       }
       if (candidates.length > 0) {
+        const movedColor = position.turn;
         const record = executeMove(selected, square);
         if (record) {
           playMoveHaptics(record.san);
+          checkVariantRules(record.move, movedColor, game.getPosition());
           if (mode === 'ai') void requestAiMove(game);
         }
         return;
@@ -271,9 +453,11 @@ export default function Index() {
   };
 
   const handlePromotion = (promotion: PromotionPiece) => {
+    const movedColor = position.turn;
     const record = handleGamePromotion(promotion);
     if (record) {
       playMoveHaptics(record.san);
+      checkVariantRules(record.move, movedColor, game.getPosition());
       if (mode === 'ai') void requestAiMove(game);
     }
   };
@@ -282,6 +466,8 @@ export default function Index() {
     cancelAi();
     resetCoach();
     resetTraining();
+    setThreeCheckState(createInitialThreeCheckState());
+    threeCheckStateRef.current = createInitialThreeCheckState();
     resetChessGame();
   };
 
@@ -316,6 +502,10 @@ export default function Index() {
   };
 
   const openHomeAction = (action: HomeActionType) => {
+    if (action === 'career') {
+      router.push('/career' as never);
+      return;
+    }
     if (action === 'puzzle-rush') {
       router.push('/puzzle-rush' as never);
       return;
@@ -340,6 +530,10 @@ export default function Index() {
       router.push('/achievements' as never);
       return;
     }
+    if (action === 'variants') {
+      setVariantsModalVisible(true);
+      return;
+    }
     if (action === 'training') startPuzzle(puzzles[0]);
     if (action === 'settings') setSettingsExpanded(true);
     setSection('play');
@@ -353,11 +547,25 @@ export default function Index() {
   if (section === 'home') {
     const luxuryTiles = [
       {
+        icon: '🏆',
+        title: 'Modo Carrera',
+        subtitle: 'Compite en torneos, sube tu rating y alcanza el Campeonato del Mundo',
+        badge: 'CARRERA',
+        action: 'career' as HomeActionType,
+      },
+      {
         icon: '⚔️',
         title: 'Jugar vs IA / Local',
         subtitle: 'Motor Stockfish 18 con 8 niveles ELO',
         badge: 'DUELO',
         action: 'play' as HomeActionType,
+      },
+      {
+        icon: '🎲',
+        title: 'Variantes de Ajedrez',
+        subtitle: 'Three-Check, King of the Hill, Fischer Random 960...',
+        badge: 'MODOS',
+        action: 'variants' as HomeActionType,
       },
       {
         icon: '⚡',
@@ -402,7 +610,7 @@ export default function Index() {
         action: 'clock' as HomeActionType,
       },
       {
-        icon: '🏆',
+        icon: '🎖️',
         title: 'Vitrina de Trofeos',
         subtitle: '16 medallas y logros desbloqueables',
         badge: 'LOGROS',
@@ -460,6 +668,43 @@ export default function Index() {
             <Text style={styles.statLabel}>Récord Rush</Text>
           </View>
         </View>
+
+        {/* HERO CAREER CARD: CONTINUAR CARRERA */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Continuar modo carrera"
+          onPress={() => router.push('/career' as never)}
+          style={({ pressed }) => [styles.careerHeroCard, pressed && styles.pressed]}
+        >
+          <View style={styles.careerHeroTopRow}>
+            <View style={styles.careerHeroBadge}>
+              <Text style={styles.careerHeroBadgeText}>🏆 MODO CARRERA</Text>
+            </View>
+            <Text style={styles.careerHeroRank}>
+              {career.currentRank.badge} {career.currentRank.name}
+            </Text>
+          </View>
+
+          <View style={styles.careerHeroMain}>
+            <View style={styles.careerHeroInfo}>
+              <Text style={styles.careerHeroTournament}>{career.profile.currentTournament.name}</Text>
+              <Text style={styles.careerHeroRating}>
+                Rating AjedrezPro:{' '}
+                <Text style={styles.careerRatingHighlight}>
+                  {career.profile.rating.currentRating}
+                </Text>
+              </Text>
+              <Text style={styles.careerHeroNextMatch}>
+                Ronda {career.profile.currentTournament.currentRound}/
+                {career.profile.currentTournament.totalRounds} • Rival:{' '}
+                {career.currentOpponent
+                  ? `${career.currentOpponent.name} (${career.currentOpponent.rating})`
+                  : 'Clasificado'}
+              </Text>
+            </View>
+            <Text style={styles.careerHeroArrow}>→</Text>
+          </View>
+        </Pressable>
 
         {/* PRIMARY CTA: JUGAR AHORA */}
         <Pressable
@@ -550,6 +795,14 @@ export default function Index() {
           </Pressable>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="Selector de variantes"
+            onPress={() => setVariantsModalVisible(true)}
+            style={styles.headerToolBtn}
+          >
+            <Text style={styles.headerToolIcon}>🎲</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
             accessibilityLabel="Reloj FIDE"
             onPress={() => router.push('/clock' as never)}
             style={styles.headerToolBtn}
@@ -608,6 +861,35 @@ export default function Index() {
           </Text>
         </Pressable>
       </View>
+
+      {/* ACTIVE VARIANT BANNER / THREE-CHECK COUNTER / KOTH OBJECTIVE */}
+      {activeVariant === 'three_check' ? (
+        <Animated.View entering={FadeInDown.duration(200)} style={styles.variantStatusCard}>
+          <View style={styles.variantBadgeRow}>
+            <Text style={styles.variantIconBadge}>⚔️</Text>
+            <Text style={styles.variantTitleBadge}>TRES JAQUES (THREE-CHECK)</Text>
+          </View>
+          <View style={styles.threeCheckScoresWrap}>
+            <View style={[styles.threeCheckPill, threeCheckState.whiteChecksGiven > 0 && styles.threeCheckPillActive]}>
+              <Text style={styles.threeCheckPillLabel}>Blancas</Text>
+              <Text style={styles.threeCheckPillValue}>{threeCheckState.whiteChecksGiven}/3</Text>
+            </View>
+            <Text style={styles.threeCheckVs}>·</Text>
+            <View style={[styles.threeCheckPill, threeCheckState.blackChecksGiven > 0 && styles.threeCheckPillActive]}>
+              <Text style={styles.threeCheckPillLabel}>Negras</Text>
+              <Text style={styles.threeCheckPillValue}>{threeCheckState.blackChecksGiven}/3</Text>
+            </View>
+          </View>
+        </Animated.View>
+      ) : activeVariant === 'king_of_the_hill' ? (
+        <Animated.View entering={FadeInDown.duration(200)} style={styles.variantStatusCard}>
+          <View style={styles.variantBadgeRow}>
+            <Text style={styles.variantIconBadge}>⛰️</Text>
+            <Text style={styles.variantTitleBadge}>REY DE LA COLINA (KOTH)</Text>
+          </View>
+          <Text style={styles.kothSubtitleBadge}>Lleva tu Rey a d4, e4, d5 o e5 para ganar</Text>
+        </Animated.View>
+      ) : null}
 
       {/* DETECTED OPENING BANNER */}
       {detectedOpening ? (
@@ -702,6 +984,20 @@ export default function Index() {
 
       {/* BOARD + LIVE EVALUATION BAR */}
       <View style={styles.boardContainer}>
+        {gameClock.clockState.preset.category !== 'none' ? (
+          <GameClockDisplay
+            whiteFormatted={gameClock.whiteFormatted}
+            blackFormatted={gameClock.blackFormatted}
+            activeSide={gameClock.clockState.activeSide}
+            isLowTimeWhite={gameClock.isLowTimeWhite}
+            isLowTimeBlack={gameClock.isLowTimeBlack}
+            preset={gameClock.clockState.preset}
+            opponentName={isCareerGame && careerOpponentState ? careerOpponentState.name : activeBot.name}
+            playerName={career.profile?.playerName ?? 'Tú'}
+            playerColor={params.playerColor === 'b' ? 'b' : 'w'}
+          />
+        ) : null}
+
         <EvalBar
           whiteWinProbability={liveEval.whiteWinProbability}
           formattedScore={liveEval.formatted}
@@ -715,7 +1011,7 @@ export default function Index() {
           selected={selected}
           legalMoves={legalMoves}
           flipped={false}
-          disabled={status.gameOver || pendingPromotion !== null || thinking || (mode === 'ai' && position.turn === 'b')}
+          disabled={status.gameOver || manualGameEndReason !== null || pendingPromotion !== null || thinking || (mode === 'ai' && position.turn === 'b')}
           lastMove={lastMove?.move ?? null}
           inCheck={status.check}
           boardTheme={boardTheme}
@@ -738,11 +1034,22 @@ export default function Index() {
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
-          onPress={resetGame}
+          onPress={handleResetGame}
           style={({ pressed }) => [styles.newGameButton, pressed && styles.pressed]}
         >
           <Text style={styles.primaryButtonText}>Nueva Partida</Text>
         </Pressable>
+
+        {!status.gameOver && !manualGameEndReason && history.length > 0 && mode !== 'rush' ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Rendirse en la partida actual"
+            onPress={handleResignGame}
+            style={({ pressed }) => [styles.resignButton, pressed && styles.pressed]}
+          >
+            <Text style={styles.resignButtonText}>🏳️ Rendirse</Text>
+          </Pressable>
+        ) : null}
       </View>
 
       {/* COACH PANEL */}
@@ -781,8 +1088,26 @@ export default function Index() {
       <GameOverModal
         status={status}
         moveCount={history.length}
-        onRematch={resetGame}
-        onNewGame={resetGame}
+        playerColor={params.playerColor === 'b' ? 'b' : 'w'}
+        manualReason={manualGameEndReason}
+        visible={status.gameOver || manualGameEndReason !== null}
+        careerContext={isCareerGame ? careerOutcomeContext : null}
+        onContinueCareer={
+          isCareerGame
+            ? () => {
+                handleResetGame();
+                setIsCareerGame(false);
+                router.push('/career' as never);
+              }
+            : undefined
+        }
+        onRematch={handleResetGame}
+        onAnalyzeGame={history.length > 0 ? () => void analyzeCurrentGame() : undefined}
+        onNewGame={() => {
+          handleResetGame();
+          setIsCareerGame(false);
+          setSection('home');
+        }}
       />
 
       {/* PROMOTION PICKER */}
@@ -791,6 +1116,18 @@ export default function Index() {
         color={position.turn}
         onSelect={handlePromotion}
         onCancel={() => setPendingPromotion(null)}
+      />
+
+      {/* VARIANTS SELECTOR MODAL */}
+      <VariantsModal
+        visible={variantsModalVisible}
+        activeVariant={activeVariant}
+        onSelectVariant={(nextVariant) => {
+          setActiveVariant(nextVariant);
+          setSection('play');
+          handleResetGame();
+        }}
+        onClose={() => setVariantsModalVisible(false)}
       />
     </ScrollView>
   );
@@ -907,6 +1244,77 @@ const styles = StyleSheet.create({
     width: 1,
     height: 28,
     backgroundColor: APP_COLORS.border,
+  },
+
+  careerHeroCard: {
+    width: '100%',
+    maxWidth: 440,
+    backgroundColor: '#0D1A29',
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#00E5FF88',
+    gap: 10,
+    boxShadow: '0 8px 24px rgba(0, 229, 255, 0.15)',
+  },
+  careerHeroTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  careerHeroBadge: {
+    backgroundColor: 'rgba(0, 229, 255, 0.18)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#00E5FF',
+  },
+  careerHeroBadgeText: {
+    color: '#00E5FF',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+  },
+  careerHeroRank: {
+    color: '#F5C518',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  careerHeroMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  careerHeroInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  careerHeroTournament: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  careerHeroRating: {
+    color: '#94AEC5',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  careerRatingHighlight: {
+    color: '#00E5FF',
+    fontWeight: '900',
+  },
+  careerHeroNextMatch: {
+    color: '#CBD5E1',
+    fontSize: 11,
+    marginTop: 2,
+  },
+  careerHeroArrow: {
+    color: '#00E5FF',
+    fontSize: 24,
+    fontWeight: '900',
+    marginLeft: 8,
   },
 
   primaryHeroButton: {
@@ -1283,6 +1691,22 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 0.3,
   },
+  resignButton: {
+    minHeight: 46,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 59, 48, 0.12)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 59, 48, 0.45)',
+    borderRadius: 16,
+    borderCurve: 'continuous',
+  },
+  resignButtonText: {
+    color: '#FF6B6B',
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
 
   aiError: {
     width: '100%',
@@ -1295,6 +1719,74 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
     padding: 12,
     fontSize: 13,
+  },
+
+  variantStatusCard: {
+    width: '100%',
+    maxWidth: 440,
+    backgroundColor: APP_COLORS.surface,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
+    padding: 12,
+    alignItems: 'center',
+    gap: 8,
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4), 0 0 10px rgba(229, 184, 105, 0.15)',
+  },
+  variantBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  variantIconBadge: {
+    fontSize: 18,
+  },
+  variantTitleBadge: {
+    color: APP_COLORS.goldBright,
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  threeCheckScoresWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  threeCheckPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: APP_COLORS.surfaceStrong,
+    borderWidth: 1,
+    borderColor: APP_COLORS.borderLight,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+  threeCheckPillActive: {
+    borderColor: APP_COLORS.blueElectric,
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+  },
+  threeCheckPillLabel: {
+    color: APP_COLORS.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  threeCheckPillValue: {
+    color: APP_COLORS.goldBright,
+    fontSize: 14,
+    fontWeight: '900',
+  },
+  threeCheckVs: {
+    color: APP_COLORS.textMuted,
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  kothSubtitleBadge: {
+    color: APP_COLORS.blueElectric,
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 
   pressed: {

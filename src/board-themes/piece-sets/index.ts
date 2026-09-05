@@ -4,6 +4,7 @@ import type { PieceSetDefinition, PieceSetId } from './types';
 import { renderStauntonPiece } from './staunton';
 import { renderModernPiece } from './modern';
 import { renderRealistic3DPiece } from './realistic-3d';
+import { renderKidsClassicPiece } from './kids-classic';
 
 export * from './types';
 
@@ -15,6 +16,14 @@ export const PIECE_SETS: readonly PieceSetDefinition[] = [
     description: 'Siluetas tradicionales FIDE en marfil pulido y madera de ébano.',
     availability: 'free',
     renderPiece: renderStauntonPiece,
+  },
+  {
+    id: 'kids-classic',
+    canonicalId: 'kids-classic',
+    name: 'Kids Castillo Encantado',
+    description: 'Siluetas Staunton amigables y redondeadas con expresiones divertidas.',
+    availability: 'free',
+    renderPiece: renderKidsClassicPiece,
   },
   {
     id: 'modern',
@@ -40,6 +49,9 @@ export function normalizePieceSetId(id: string | null | undefined): PieceSetId {
     case 'staunton':
     case 'classic':
       return 'staunton';
+    case 'kids-classic':
+    case 'kids':
+      return 'kids-classic';
     case 'modern':
     case 'minimalist':
       return 'modern';

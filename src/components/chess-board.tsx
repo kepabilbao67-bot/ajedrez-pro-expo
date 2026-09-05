@@ -70,7 +70,7 @@ function MovingPiece({
 
   useEffect(() => {
     progress.value = 0;
-    progress.value = withTiming(1, { duration: 190 });
+    progress.value = withTiming(1, { duration: 180 });
   }, [move, progress]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -129,8 +129,8 @@ export function ChessBoard({
         styles.outerBevel,
         {
           borderColor: boardTheme.frame,
-          width: size + 10,
-          height: size + 10,
+          width: size + 8,
+          height: size + 8,
         },
       ]}
     >
@@ -139,7 +139,7 @@ export function ChessBoard({
           styles.frame,
           {
             backgroundColor: '#070B0E',
-            borderColor: 'rgba(212, 175, 55, 0.4)',
+            borderColor: 'rgba(212, 175, 55, 0.45)',
             width: size + 4,
             height: size + 4,
           },
@@ -189,17 +189,22 @@ export function ChessBoard({
                     height: squareSize,
                     backgroundColor: isLight ? boardTheme.lightSquare : boardTheme.darkSquare,
                   },
-                  isLastMove && {
-                    backgroundColor: isLight ? '#1B4965' : '#0F2B48',
-                  },
-                  square === checkedKing && styles.checkedKing,
-                  selected === square && styles.selectedSquare,
                   pressed && !disabled && styles.pressed,
                 ]}
               >
-                {/* Last Move Glow overlay */}
+                {/* Last Move Glow overlay (Amber tint with crisp border) */}
                 {isLastMove ? (
                   <View style={styles.lastMoveGlow} />
+                ) : null}
+
+                {/* Selected Square Highlight overlay */}
+                {selected === square ? (
+                  <View style={styles.selectedOverlay} />
+                ) : null}
+
+                {/* King in Check Red Alert Halo */}
+                {square === checkedKing ? (
+                  <View style={styles.checkedKingOverlay} />
                 ) : null}
 
                 {/* Capture Flash animation */}
@@ -207,7 +212,7 @@ export function ChessBoard({
                   <Animated.View entering={FadeIn.duration(180)} style={styles.captureFlash} />
                 ) : null}
 
-                {/* Piece Rendering */}
+                {/* Piece Rendering with optimal scale */}
                 {piece ? (
                   <Animated.View
                     key={`${piece}-${square}`}
@@ -219,7 +224,7 @@ export function ChessBoard({
                   </Animated.View>
                 ) : null}
 
-                {/* Legal Move Indicators */}
+                {/* Legal Move Indicators (Accessibility: Dot for move, Ring for capture) */}
                 {move ? (
                   move.capture ? (
                     <Animated.View
@@ -227,7 +232,7 @@ export function ChessBoard({
                       accessibilityElementsHidden
                       style={[
                         styles.captureTarget,
-                        { width: squareSize - 6, height: squareSize - 6 },
+                        { width: squareSize - 6, height: squareSize - 6, borderRadius: (squareSize - 6) / 2 },
                       ]}
                     />
                   ) : (
@@ -237,9 +242,9 @@ export function ChessBoard({
                       style={[
                         styles.moveTarget,
                         {
-                          backgroundColor: '#00D2FF',
-                          width: Math.max(10, squareSize * 0.26),
-                          height: Math.max(10, squareSize * 0.26),
+                          width: Math.max(12, squareSize * 0.28),
+                          height: Math.max(12, squareSize * 0.28),
+                          borderRadius: Math.max(12, squareSize * 0.28) / 2,
                         },
                       ]}
                     />
@@ -299,16 +304,16 @@ const styles = StyleSheet.create({
   outerBevel: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 20,
+    borderRadius: 18,
     borderCurve: 'continuous',
     borderWidth: 2,
     backgroundColor: '#0B1117',
-    boxShadow: '0 14px 38px rgba(0, 0, 0, 0.65), 0 0 16px rgba(212, 175, 55, 0.25)',
+    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.65), 0 0 14px rgba(212, 175, 55, 0.25)',
   },
   frame: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
+    borderRadius: 14,
     borderCurve: 'continuous',
     overflow: 'hidden',
     borderWidth: 1,
@@ -317,7 +322,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     overflow: 'hidden',
-    borderRadius: 14,
+    borderRadius: 12,
     borderCurve: 'continuous',
   },
   square: {
@@ -325,26 +330,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     position: 'relative',
   },
-  selectedSquare: {
-    borderWidth: 3,
+  selectedOverlay: {
+    position: 'absolute',
+    inset: 0,
+    zIndex: 1,
+    borderWidth: 2.5,
     borderColor: '#00E5FF',
-    boxShadow: 'inset 0 0 12px rgba(0, 229, 255, 0.45)',
+    backgroundColor: 'rgba(0, 229, 255, 0.22)',
   },
   lastMoveGlow: {
     position: 'absolute',
     inset: 0,
+    zIndex: 1,
     borderWidth: 1.5,
-    borderColor: 'rgba(0, 210, 255, 0.55)',
-    backgroundColor: 'rgba(0, 210, 255, 0.12)',
+    borderColor: 'rgba(245, 197, 24, 0.55)',
+    backgroundColor: 'rgba(245, 197, 24, 0.22)',
   },
-  checkedKing: {
-    backgroundColor: '#991B1B',
+  checkedKingOverlay: {
+    position: 'absolute',
+    inset: 0,
+    zIndex: 1,
+    backgroundColor: 'rgba(239, 68, 68, 0.42)',
     borderWidth: 2.5,
-    borderColor: '#FCA5A5',
-    boxShadow: 'inset 0 0 16px rgba(239, 68, 68, 0.75)',
+    borderColor: '#EF4444',
+    boxShadow: 'inset 0 0 14px rgba(239, 68, 68, 0.75)',
   },
   pressed: {
-    opacity: 0.8,
+    opacity: 0.82,
   },
   pieceContainer: {
     zIndex: 2,
@@ -360,31 +372,30 @@ const styles = StyleSheet.create({
   moveTarget: {
     position: 'absolute',
     zIndex: 3,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: '#070B0E',
-    boxShadow: '0 0 8px #00D2FF',
+    backgroundColor: '#00E5FF',
+    borderWidth: 1.5,
+    borderColor: 'rgba(7, 11, 14, 0.65)',
+    boxShadow: '0 0 8px rgba(0, 229, 255, 0.75)',
   },
   captureTarget: {
     position: 'absolute',
     zIndex: 3,
-    borderRadius: 999,
     borderWidth: 3.5,
     borderColor: '#FF3B30',
-    backgroundColor: 'rgba(255, 59, 48, 0.15)',
+    backgroundColor: 'rgba(255, 59, 48, 0.16)',
     boxShadow: '0 0 10px rgba(255, 59, 48, 0.65)',
   },
   captureFlash: {
     position: 'absolute',
     inset: 0,
     zIndex: 1,
-    backgroundColor: 'rgba(255, 59, 48, 0.38)',
+    backgroundColor: 'rgba(255, 59, 48, 0.35)',
   },
   coordinate: {
     position: 'absolute',
     zIndex: 4,
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '800',
     fontVariant: ['tabular-nums'],
     letterSpacing: 0.2,
   },
@@ -394,6 +405,6 @@ const styles = StyleSheet.create({
   },
   file: {
     right: 3,
-    bottom: 1,
+    bottom: 2,
   },
 });

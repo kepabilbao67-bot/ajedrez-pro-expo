@@ -6,213 +6,249 @@ export function renderStauntonPiece(piece: Piece, size: number): React.ReactElem
   const isWhite = colorOf(piece) === 'w';
   const type = typeOf(piece);
 
-  const fillMain = isWhite ? 'url(#staunton-gold-grad)' : 'url(#staunton-obsidian-grad)';
-  const strokeColor = isWhite ? '#785208' : '#03080E';
-  const accentColor = isWhite ? '#FFF8D6' : '#00D2FF';
-  const innerShadow = isWhite ? '#B8860B' : '#002B4D';
-  const rimLight = isWhite ? '#FFE89C' : '#00E5FF';
+  const fillMain = isWhite ? 'url(#staunton-white-grad)' : 'url(#staunton-black-grad)';
+  const strokeColor = isWhite ? '#1E293B' : '#38BDF8';
+  const innerStroke = isWhite ? '#CBD5E1' : '#0F172A';
+  const accentColor = isWhite ? '#FFF8E7' : '#38BDF8';
+  const innerShadow = isWhite ? '#E2E8F0' : '#090D12';
+  const rimLight = isWhite ? '#FFFFFF' : '#7DD3FC';
+  const strokeW = isWhite ? '2.5' : '2.6';
 
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <Defs>
-        {/* White Pieces: Rich Metallic Gold Gradient */}
-        <LinearGradient id="staunton-gold-grad" x1="0" y1="0" x2="0.3" y2="1">
-          <Stop offset="0%" stopColor="#FFF2B2" />
-          <Stop offset="25%" stopColor="#FFDE6A" />
-          <Stop offset="65%" stopColor="#E5B842" />
-          <Stop offset="90%" stopColor="#BA8821" />
-          <Stop offset="100%" stopColor="#785208" />
-        </LinearGradient>
-
-        {/* Black Pieces: Deep Polished Obsidian with Electric Blue Undertone */}
-        <LinearGradient id="staunton-obsidian-grad" x1="0" y1="0" x2="0.3" y2="1">
-          <Stop offset="0%" stopColor="#2A3C4D" />
-          <Stop offset="25%" stopColor="#152230" />
-          <Stop offset="65%" stopColor="#0B131C" />
-          <Stop offset="100%" stopColor="#04080E" />
-        </LinearGradient>
-
-        <RadialGradient id="staunton-gold-radial" cx="35%" cy="30%" r="65%">
+        {/* White Pieces: Refined Warm Ivory & Crisp White for Instant Recognition */}
+        <LinearGradient id="staunton-white-grad" x1="0" y1="0" x2="0.3" y2="1">
           <Stop offset="0%" stopColor="#FFFFFF" />
-          <Stop offset="40%" stopColor="#FFE07A" />
-          <Stop offset="80%" stopColor="#D4A017" />
-          <Stop offset="100%" stopColor="#7A5200" />
+          <Stop offset="30%" stopColor="#F8FAFC" />
+          <Stop offset="70%" stopColor="#EDE8DC" />
+          <Stop offset="100%" stopColor="#DDD6C6" />
+        </LinearGradient>
+
+        {/* Black Pieces: Deep Charcoal Obsidian with Titanium Sheen */}
+        <LinearGradient id="staunton-black-grad" x1="0" y1="0" x2="0.3" y2="1">
+          <Stop offset="0%" stopColor="#334155" />
+          <Stop offset="30%" stopColor="#1E293B" />
+          <Stop offset="70%" stopColor="#0F172A" />
+          <Stop offset="100%" stopColor="#070C12" />
+        </LinearGradient>
+
+        <RadialGradient id="staunton-white-radial" cx="35%" cy="30%" r="65%">
+          <Stop offset="0%" stopColor="#FFFFFF" />
+          <Stop offset="45%" stopColor="#F8FAFC" />
+          <Stop offset="80%" stopColor="#E5DFD0" />
+          <Stop offset="100%" stopColor="#C8BEA8" />
         </RadialGradient>
 
-        <RadialGradient id="staunton-obsidian-radial" cx="35%" cy="30%" r="65%">
-          <Stop offset="0%" stopColor="#3A506B" />
-          <Stop offset="40%" stopColor="#1C2541" />
-          <Stop offset="80%" stopColor="#0B131F" />
-          <Stop offset="100%" stopColor="#02060B" />
+        <RadialGradient id="staunton-black-radial" cx="35%" cy="30%" r="65%">
+          <Stop offset="0%" stopColor="#64748B" />
+          <Stop offset="35%" stopColor="#334155" />
+          <Stop offset="75%" stopColor="#0F172A" />
+          <Stop offset="100%" stopColor="#06090E" />
         </RadialGradient>
       </Defs>
 
       <G transform="translate(0, 0)">
-        {/* Soft Drop Shadow under base */}
+        {/* Grounding Contact Drop Shadow under base */}
         <Path
-          d="M 17 91 Q 50 95 83 91 Q 50 88 17 91 Z"
+          d="M 16 91 Q 50 95 84 91 Q 50 88 16 91 Z"
           fill="#000000"
-          opacity="0.45"
+          opacity={isWhite ? 0.45 : 0.65}
         />
 
         {/* Base pedestal for all pieces */}
         <Path
-          d="M 22 84 Q 50 80 78 84 L 81 90 Q 50 93 19 90 Z"
+          d="M 20 83 Q 50 79 80 83 L 83 90 Q 50 93 17 90 Z"
           fill={fillMain}
           stroke={strokeColor}
-          strokeWidth="2.4"
+          strokeWidth={strokeW}
           strokeLinejoin="round"
         />
-        {/* Metallic Bevel Ring on Base */}
+        {/* Tiered Bevel on Base */}
         <Path
-          d="M 25 81 Q 50 78 75 81 L 78 84 Q 50 80 22 84 Z"
+          d="M 24 80 Q 50 77 76 80 L 79 83 Q 50 79 21 83 Z"
           fill={innerShadow}
-          opacity={isWhite ? 0.45 : 0.6}
+          stroke={isWhite ? 'none' : innerStroke}
+          strokeWidth={isWhite ? '0' : '1.2'}
+          opacity={isWhite ? 0.5 : 0.85}
         />
         {/* Base Rim Highlight */}
         <Path
-          d="M 24 84 Q 50 81 76 84"
+          d="M 22 83 Q 50 80 78 83"
           stroke={rimLight}
-          strokeWidth="1.2"
+          strokeWidth="1.6"
           fill="none"
-          opacity={isWhite ? 0.85 : 0.6}
+          opacity={isWhite ? 0.9 : 0.85}
         />
 
         {/* --- PIECE SPECIFIC GEOMETRY --- */}
 
-        {/* Pawn */}
+        {/* Pawn (Peón) */}
         {type === 'p' && (
           <G>
             {/* Body */}
             <Path
-              d="M 34 81 Q 40 58 45 42 Q 38 42 38 38 Q 38 34 50 34 Q 62 34 62 38 Q 62 42 55 42 Q 60 58 66 81 Z"
+              d="M 33 80 Q 40 56 44 40 Q 37 40 37 36 Q 37 32 50 32 Q 63 32 63 36 Q 63 40 56 40 Q 60 56 67 80 Z"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="2.4"
+              strokeWidth={strokeW}
               strokeLinejoin="round"
             />
             {/* Sphere Head */}
             <Circle
               cx="50"
-              cy="24"
-              r="13"
-              fill={isWhite ? 'url(#staunton-gold-radial)' : 'url(#staunton-obsidian-radial)'}
+              cy="22"
+              r="14"
+              fill={isWhite ? 'url(#staunton-white-radial)' : 'url(#staunton-black-radial)'}
               stroke={strokeColor}
-              strokeWidth="2.4"
+              strokeWidth={strokeW}
             />
-            {/* Metallic Specular Glint */}
-            <Circle cx="45" cy="19" r="4.2" fill={accentColor} opacity={isWhite ? 0.85 : 0.55} />
-            <Circle cx="44" cy="18" r="1.8" fill="#FFFFFF" opacity={isWhite ? 0.95 : 0.7} />
+            {/* Specular Glint */}
+            <Circle cx="44" cy="17" r="4.2" fill={accentColor} opacity={isWhite ? 0.9 : 0.8} />
+            <Circle cx="43" cy="16" r="1.8" fill="#FFFFFF" opacity={0.95} />
+            {/* Rim reflex on lower sphere */}
+            <Path d="M 39 30 Q 50 35 61 30" stroke={rimLight} strokeWidth="1.5" fill="none" opacity={isWhite ? 0.8 : 0.9} />
           </G>
         )}
 
-        {/* Rook */}
+        {/* Rook (Torre) */}
         {type === 'r' && (
           <G>
+            {/* Main Castle Walls & Battlement */}
             <Path
-              d="M 30 81 L 34 40 L 26 38 L 26 23 L 36 23 L 36 30 L 45 30 L 45 23 L 55 23 L 55 30 L 64 30 L 64 23 L 74 23 L 74 38 L 66 40 L 70 81 Z"
+              d="M 28 80 L 33 39 L 24 37 L 24 21 L 35 21 L 35 28 L 44 28 L 44 21 L 56 21 L 56 28 L 65 28 L 65 21 L 76 21 L 76 37 L 67 39 L 72 80 Z"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="2.4"
+              strokeWidth={strokeW}
               strokeLinejoin="round"
             />
-            {/* Parapet line & Embossed metallic band */}
-            <Path d="M 28 38 Q 50 36 72 38" stroke={strokeColor} strokeWidth="2" fill="none" />
-            <Path d="M 30 39 Q 50 37 70 39" stroke={rimLight} strokeWidth="1.2" fill="none" opacity={0.7} />
-            <Path d="M 33 46 Q 50 44 67 46" stroke={strokeColor} strokeWidth="1.8" fill="none" opacity="0.6" />
+            {/* Parapet cornice band */}
+            <Path d="M 26 37 Q 50 35 74 37" stroke={strokeColor} strokeWidth="2.2" fill="none" />
+            <Path d="M 28 38 Q 50 36 72 38" stroke={rimLight} strokeWidth="1.6" fill="none" opacity={0.9} />
+            <Path d="M 31 45 Q 50 43 69 45" stroke={isWhite ? strokeColor : rimLight} strokeWidth="1.5" fill="none" opacity={isWhite ? 0.4 : 0.7} />
+            {/* Battlement top edge highlights */}
+            <Path d="M 25 22 L 34 22 M 45 22 L 55 22 M 66 22 L 75 22" stroke={accentColor} strokeWidth="1.8" strokeLinecap="round" opacity={0.95} />
           </G>
         )}
 
-        {/* Knight */}
+        {/* Knight (Caballo) */}
         {type === 'n' && (
           <G>
+            {/* Sculpted horse body and head */}
             <Path
-              d="M 28 81 Q 30 65 24 55 Q 18 45 26 38 Q 34 32 37 20 Q 44 14 54 18 Q 52 24 57 26 Q 66 22 72 30 Q 76 38 74 48 Q 72 58 72 81 Z"
+              d="M 26 80 Q 28 64 22 54 Q 16 43 25 36 Q 34 30 36 17 Q 43 11 53 15 Q 51 21 56 23 Q 66 19 73 28 Q 77 37 75 48 Q 73 58 74 80 Z"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="2.4"
+              strokeWidth={strokeW}
               strokeLinejoin="round"
             />
-            {/* Muzzle and Jaw relief */}
+            {/* Muzzle and Jaw relief contour */}
             <Path
-              d="M 26 38 Q 32 44 38 43 Q 44 42 42 48 Q 36 52 24 55"
+              d="M 24 37 Q 31 43 37 42 Q 43 41 41 47 Q 35 51 23 54"
               fill={innerShadow}
-              opacity={isWhite ? 0.35 : 0.6}
+              stroke={isWhite ? 'none' : innerStroke}
+              strokeWidth={isWhite ? '0' : '1.2'}
+              opacity={isWhite ? 0.35 : 0.8}
             />
-            {/* Eye */}
-            <Circle cx="36" cy="30" r="3.2" fill={isWhite ? '#4A3305' : '#00D2FF'} />
-            <Circle cx="35.5" cy="29.5" r="1.2" fill="#FFFFFF" opacity={0.9} />
-            {/* Snout line */}
-            <Path d="M 22 45 L 28 47" stroke={strokeColor} strokeWidth="2.2" strokeLinecap="round" />
+            {/* High-contrast Eye */}
+            <Circle cx="35" cy="28" r="3.4" fill={isWhite ? '#0F172A' : '#38BDF8'} stroke={isWhite ? '#64748B' : '#070C12'} strokeWidth="1" />
+            <Circle cx="34.5" cy="27.5" r="1.3" fill="#FFFFFF" opacity={0.95} />
+            {/* Nostril / Snout accent */}
+            <Path d="M 21 44 L 27 46" stroke={isWhite ? strokeColor : rimLight} strokeWidth="2.2" strokeLinecap="round" />
             {/* Flowing Mane highlight */}
-            <Path d="M 52 22 Q 62 26 65 38 Q 67 50 68 62" stroke={rimLight} strokeWidth="2.2" fill="none" opacity={isWhite ? 0.8 : 0.6} />
+            <Path d="M 51 19 Q 62 23 66 36 Q 68 49 69 62" stroke={rimLight} strokeWidth="2.4" fill="none" opacity={isWhite ? 0.85 : 0.9} />
+            {/* Forehead crest gleam */}
+            <Path d="M 39 15 Q 46 13 52 16" stroke={accentColor} strokeWidth="2" fill="none" strokeLinecap="round" opacity={0.95} />
           </G>
         )}
 
-        {/* Bishop */}
+        {/* Bishop (Alfil) */}
         {type === 'b' && (
           <G>
+            {/* Main Mitre Body */}
             <Path
-              d="M 32 81 Q 38 60 40 45 Q 32 42 32 36 Q 32 25 50 16 Q 68 25 68 36 Q 68 42 60 45 Q 62 60 68 81 Z"
+              d="M 30 80 Q 37 58 39 43 Q 30 40 30 34 Q 30 22 50 14 Q 70 22 70 34 Q 70 40 61 43 Q 63 58 70 80 Z"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="2.4"
+              strokeWidth={strokeW}
               strokeLinejoin="round"
             />
-            {/* Mitre cut slit */}
-            <Path d="M 44 26 L 56 38" stroke={isWhite ? '#5A3E06' : '#00D2FF'} strokeWidth="2.8" strokeLinecap="round" />
-            {/* Top sphere pearl */}
-            <Circle cx="50" cy="13" r="4" fill={isWhite ? 'url(#staunton-gold-radial)' : 'url(#staunton-obsidian-radial)'} stroke={strokeColor} strokeWidth="2" />
-            <Circle cx="48" cy="11.5" r="1.4" fill="#FFFFFF" opacity={0.9} />
-            <Path d="M 36 45 Q 50 42 64 45" stroke={strokeColor} strokeWidth="2" fill="none" />
+            {/* Wide, Prominent Mitre Cut Notch (High Visibility) */}
+            <Path
+              d="M 43 23 L 57 37"
+              stroke={isWhite ? '#0F172A' : '#38BDF8'}
+              strokeWidth="3.6"
+              strokeLinecap="round"
+            />
+            {/* Top Sphere Finial (Pearl) */}
+            <Circle
+              cx="50"
+              cy="11"
+              r="4.6"
+              fill={isWhite ? 'url(#staunton-white-radial)' : 'url(#staunton-black-radial)'}
+              stroke={strokeColor}
+              strokeWidth={isWhite ? '2' : '2.4'}
+            />
+            <Circle cx="48" cy="9.5" r="1.6" fill="#FFFFFF" opacity={0.95} />
+            {/* Middle collar curve */}
+            <Path d="M 34 43 Q 50 40 66 43" stroke={rimLight} strokeWidth="1.8" fill="none" opacity={0.85} />
           </G>
         )}
 
-        {/* Queen */}
+        {/* Queen (Dama) */}
         {type === 'q' && (
           <G>
+            {/* Queen Body & 5-Point Crown */}
             <Path
-              d="M 30 81 Q 38 58 40 44 L 25 32 L 37 36 L 50 22 L 63 36 L 75 32 L 60 44 Q 62 58 70 81 Z"
+              d="M 28 80 Q 36 56 39 42 L 23 29 L 36 34 L 50 19 L 64 34 L 77 29 L 61 42 Q 64 56 72 80 Z"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="2.4"
+              strokeWidth={strokeW}
               strokeLinejoin="round"
             />
-            {/* Crown pearls in gleaming gold / cyan */}
-            <Circle cx="25" cy="30" r="3.2" fill={isWhite ? '#FFE5A3' : '#00D2FF'} stroke={strokeColor} strokeWidth="1.8" />
-            <Circle cx="37" cy="34" r="3.2" fill={isWhite ? '#FFE5A3' : '#00D2FF'} stroke={strokeColor} strokeWidth="1.8" />
-            <Circle cx="50" cy="20" r="4" fill={isWhite ? '#FFE5A3' : '#00D2FF'} stroke={strokeColor} strokeWidth="2" />
-            <Circle cx="63" cy="34" r="3.2" fill={isWhite ? '#FFE5A3' : '#00D2FF'} stroke={strokeColor} strokeWidth="1.8" />
-            <Circle cx="75" cy="30" r="3.2" fill={isWhite ? '#FFE5A3' : '#00D2FF'} stroke={strokeColor} strokeWidth="1.8" />
-            <Path d="M 34 46 Q 50 42 66 46" stroke={rimLight} strokeWidth="1.8" fill="none" opacity={0.7} />
+            {/* 5 Distinct Crown Pearls */}
+            <Circle cx="23" cy="27" r="3.6" fill={accentColor} stroke={strokeColor} strokeWidth="1.8" />
+            <Circle cx="36" cy="32" r="3.6" fill={accentColor} stroke={strokeColor} strokeWidth="1.8" />
+            <Circle cx="50" cy="17" r="4.8" fill={accentColor} stroke={strokeColor} strokeWidth="2" />
+            <Circle cx="64" cy="32" r="3.6" fill={accentColor} stroke={strokeColor} strokeWidth="1.8" />
+            <Circle cx="77" cy="27" r="3.6" fill={accentColor} stroke={strokeColor} strokeWidth="1.8" />
+            {/* Center Pearl Specular Highlight */}
+            <Circle cx="49" cy="15.5" r="1.6" fill="#FFFFFF" opacity={0.95} />
+            {/* Royal Waist Band */}
+            <Path d="M 32 44 Q 50 40 68 44" stroke={rimLight} strokeWidth="2" fill="none" opacity={0.9} />
           </G>
         )}
 
-        {/* King */}
+        {/* King (Rey) */}
         {type === 'k' && (
           <G>
+            {/* Regal Crown Body */}
             <Path
-              d="M 30 81 Q 38 58 38 42 L 30 32 Q 36 28 50 30 Q 64 28 70 32 L 62 42 Q 62 58 70 81 Z"
+              d="M 28 80 Q 36 56 36 40 L 28 29 Q 35 25 50 27 Q 65 25 72 29 L 64 40 Q 64 56 72 80 Z"
               fill={fillMain}
               stroke={strokeColor}
-              strokeWidth="2.4"
+              strokeWidth={strokeW}
               strokeLinejoin="round"
             />
-            {/* Imperial Cross with dual-tone gleam */}
+            {/* Prominent Imperial Cross */}
+            {/* Outer Cross Silhouette */}
             <Path
-              d="M 50 11 L 50 26 M 43 17 L 57 17"
+              d="M 50 7 L 50 25 M 40 14 L 60 14"
               stroke={strokeColor}
-              strokeWidth="3.2"
+              strokeWidth="4.2"
               strokeLinecap="square"
             />
+            {/* Inner Glowing Cross Core */}
             <Path
-              d="M 50 12 L 50 25 M 44 17 L 56 17"
-              stroke={rimLight}
-              strokeWidth="1.6"
+              d="M 50 8 L 50 24 M 41 14 L 59 14"
+              stroke={accentColor}
+              strokeWidth="2.4"
               strokeLinecap="square"
             />
-            <Path d="M 34 32 Q 50 38 66 32" stroke={strokeColor} strokeWidth="2" fill="none" />
-            <Path d="M 36 44 Q 50 40 64 44" stroke={rimLight} strokeWidth="1.8" fill="none" opacity={0.65} />
+            <Circle cx="50" cy="14" r="1.8" fill="#FFFFFF" opacity={0.95} />
+            {/* Crown base arches */}
+            <Path d="M 32 29 Q 50 35 68 29" stroke={isWhite ? strokeColor : innerStroke} strokeWidth="2" fill="none" />
+            <Path d="M 34 42 Q 50 38 66 42" stroke={rimLight} strokeWidth="2" fill="none" opacity={0.9} />
           </G>
         )}
       </G>
