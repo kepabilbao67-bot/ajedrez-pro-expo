@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 
 import { difficultyDefinition } from '@/ai/difficulty';
 import type { Color, Move, PromotionPiece, Square } from '@/chess';
@@ -655,23 +656,17 @@ export default function Index() {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        {/* BRANDING HERO */}
-        <Animated.View entering={FadeInDown.duration(280)} style={styles.heroCard}>
-          <View style={styles.heroHeaderRow}>
-            <View style={styles.crownContainer}>
-              <Text style={styles.crownIcon}>♛</Text>
-            </View>
-            <View style={styles.brandTitleCol}>
-              <Text style={styles.brandEyebrow}>GRAN MAESTRO EDITION</Text>
-              <Text style={styles.brandTitle}>AJEDREZ PRO</Text>
-            </View>
-            <View style={styles.heroVersionBadge}>
-              <Text style={styles.heroVersionText}>v1.3</Text>
-            </View>
+        {/* CINEMATIC BRANDING HERO COVER */}
+        <Animated.View entering={FadeInDown.duration(280)} style={styles.heroCoverCard}>
+          <Image
+            source={require('../../assets/images/portada-hero.jpg')}
+            style={styles.heroCoverImage}
+            contentFit="cover"
+            transition={250}
+          />
+          <View style={styles.heroCoverBadge}>
+            <Text style={styles.heroCoverBadgeText}>🏆 EDICIÓN GRAN MAESTRO</Text>
           </View>
-          <Text style={styles.heroSubtitle}>
-            Apertura teórica, cálculo táctico relámpago y comprensión magistral.
-          </Text>
         </Animated.View>
 
         {/* STATS OVERVIEW CARD */}
@@ -1168,70 +1163,40 @@ const styles = StyleSheet.create({
   container: { paddingHorizontal: 14, paddingTop: 16, paddingBottom: 48, alignItems: 'center', gap: 12 },
 
   // --- HOME STYLES ---
-  heroCard: {
+  heroCoverCard: {
     width: '100%',
     maxWidth: 440,
-    padding: 18,
-    borderRadius: 22,
+    height: 220,
+    borderRadius: 20,
     borderCurve: 'continuous',
+    overflow: 'hidden',
     backgroundColor: APP_COLORS.surface,
     borderWidth: 1.5,
     borderColor: APP_COLORS.borderGold,
-    gap: 8,
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 14px rgba(229, 184, 105, 0.15)',
+    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.7), 0 0 16px rgba(229, 184, 105, 0.25)',
+    position: 'relative',
   },
-  heroHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  heroCoverImage: {
+    width: '100%',
+    height: '100%',
   },
-  crownContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: 'rgba(229, 184, 105, 0.12)',
+  heroCoverBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(7, 11, 14, 0.82)',
     borderWidth: 1,
-    borderColor: APP_COLORS.goldPrimary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: APP_COLORS.borderGold,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 10,
+    borderCurve: 'continuous',
   },
-  crownIcon: {
+  heroCoverBadgeText: {
     color: APP_COLORS.goldBright,
-    fontSize: 24,
-  },
-  brandTitleCol: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  brandEyebrow: {
-    color: APP_COLORS.blueElectric,
     fontSize: 10,
     fontWeight: '900',
-    letterSpacing: 1.5,
-  },
-  brandTitle: {
-    color: APP_COLORS.goldBright,
-    fontSize: 24,
-    fontWeight: '900',
-    letterSpacing: -0.5,
-  },
-  heroVersionBadge: {
-    backgroundColor: APP_COLORS.surfaceStrong,
-    borderWidth: 1,
-    borderColor: APP_COLORS.borderLight,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  heroVersionText: {
-    color: APP_COLORS.textSecondary,
-    fontSize: 11,
-    fontWeight: '800',
-  },
-  heroSubtitle: {
-    color: APP_COLORS.textSecondary,
-    fontSize: 13,
-    lineHeight: 18,
+    letterSpacing: 0.8,
   },
 
   statsCard: {
