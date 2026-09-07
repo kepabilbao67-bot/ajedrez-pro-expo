@@ -1,117 +1,139 @@
+import { APP_COLORS } from '@/theme/colors';
 import { StyleSheet, Text, View } from 'react-native';
+
+export type PremiumBadgeVariant = 'default' | 'compact' | 'feature-lock';
 
 export interface PremiumBadgeProps {
   readonly isPro: boolean;
-  readonly variant?: 'default' | 'compact' | 'feature-lock';
+  readonly variant?: PremiumBadgeVariant;
 }
 
+/**
+ * Badge que muestra estado Premium (FREE o PRO)
+ */
 export function PremiumBadge({ isPro, variant = 'default' }: PremiumBadgeProps) {
-  if (variant === 'compact') {
-    return (
-      <View
-        accessibilityLabel={isPro ? 'PRO' : 'FREE'}
-        accessibilityRole="text"
-        style={[styles.compactBadge, isPro ? styles.proBadge : styles.freeBadge]}
-      >
-        <Text style={[styles.compactText, isPro ? styles.proText : styles.freeText]}>
-          {isPro ? 'PRO' : 'FREE'}
-        </Text>
-      </View>
-    );
-  }
+  const isFree = !isPro;
 
-  if (variant === 'feature-lock') {
-    return (
-      <View
-        accessibilityLabel="Requiere PRO"
-        accessibilityRole="text"
-        style={[styles.featureLockBadge, isPro ? styles.proBadge : styles.lockedBadge]}
-      >
-        <Text style={[styles.featureLockText, isPro ? styles.proText : styles.lockedText]}>
-          {isPro ? '✨ PRO' : '🔒 PRO'}
-        </Text>
-      </View>
-    );
-  }
+  // Configuración por variante
+  const config = {
+    default: {
+      container: styles.containerDefault,
+      text: styles.textDefault,
+      freeBackground: styles.freeBackground,
+      proBackground: styles.proBackground,
+      freeText: styles.freeText,
+      proText: styles.proText,
+    },
+    compact: {
+      container: styles.containerCompact,
+      text: styles.textCompact,
+      freeBackground: styles.freeBackground,
+      proBackground: styles.proBackground,
+      freeText: styles.freeText,
+      proText: styles.proText,
+    },
+    'feature-lock': {
+      container: styles.containerFeatureLock,
+      text: styles.textFeatureLock,
+      freeBackground: styles.freeBackgroundFeatureLock,
+      proBackground: styles.proBackground,
+      freeText: styles.freeTextFeatureLock,
+      proText: styles.proText,
+    },
+  }[variant];
+
+  const label = isPro ? 'PRO' : 'FREE';
+  const accessibilityLabel = isPro ? 'Usuario Pro' : 'Usuario Free';
 
   return (
     <View
-      accessibilityLabel={isPro ? 'Cuenta PRO activa' : 'Cuenta FREE'}
+      style={[
+        config.container,
+        isFree ? config.freeBackground : config.proBackground,
+      ]}
+      accessible
+      accessibilityLabel={accessibilityLabel}
       accessibilityRole="text"
-      style={[styles.defaultBadge, isPro ? styles.proBadge : styles.freeBadge]}
     >
-      <Text style={[styles.defaultText, isPro ? styles.proText : styles.freeText]}>
-        {isPro ? '✨ PRO' : 'FREE'}
+      <Text style={[config.text, isFree ? config.freeText : config.proText]}>
+        {label}
       </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  defaultBadge: {
-    minHeight: 28,
+  // Variante default
+  containerDefault: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
-    borderCurve: 'continuous',
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    minWidth: 60,
   },
-  compactBadge: {
-    minHeight: 22,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    borderCurve: 'continuous',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  featureLockBadge: {
-    minHeight: 24,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 7,
-    borderCurve: 'continuous',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  proBadge: {
-    backgroundColor: '#3B2D10',
-    borderColor: '#D6A943',
-  },
-  freeBadge: {
-    backgroundColor: '#14241D',
-    borderColor: '#294235',
-  },
-  lockedBadge: {
-    backgroundColor: '#1B1D1A',
-    borderColor: '#3B3F3A',
-  },
-  defaultText: {
-    fontSize: 13,
-    fontWeight: '900',
+  textDefault: {
+    fontSize: 14,
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
-  compactText: {
-    fontSize: 11,
-    fontWeight: '900',
-    letterSpacing: 0.6,
+
+  // Variante compact
+  containerCompact: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 48,
   },
-  featureLockText: {
-    fontSize: 11,
-    fontWeight: '800',
+  textCompact: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+
+  // Variante feature-lock
+  containerFeatureLock: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 54,
+    borderWidth: 1,
+  },
+  textFeatureLock: {
+    fontSize: 13,
+    fontWeight: '700',
     letterSpacing: 0.4,
   },
-  proText: {
-    color: '#F7CE63',
+
+  // Colores FREE
+  freeBackground: {
+    backgroundColor: APP_COLORS.backgroundSecondary,
+    borderColor: APP_COLORS.border,
+    borderWidth: 1,
+  },
+  freeBackgroundFeatureLock: {
+    backgroundColor: 'transparent',
+    borderColor: APP_COLORS.textSecondary,
+    borderWidth: 1,
   },
   freeText: {
-    color: '#9EAFA5',
+    color: APP_COLORS.textSecondary,
   },
-  lockedText: {
-    color: '#7A827D',
+  freeTextFeatureLock: {
+    color: APP_COLORS.textSecondary,
+  },
+
+  // Colores PRO
+  proBackground: {
+    backgroundColor: APP_COLORS.goldGlow,
+    borderColor: APP_COLORS.goldPrimary,
+    borderWidth: 1,
+  },
+  proText: {
+    color: APP_COLORS.goldPrimary,
   },
 });

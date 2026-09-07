@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { StyleSheet, Text, View, Pressable, Dimensions, ScrollView } from 'react-native';
 import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutLeft } from 'react-native-reanimated';
+import { APP_COLORS } from '@/theme/colors';
 
 export interface OnboardingScreenProps {
   readonly onComplete: () => void;
@@ -106,18 +107,18 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09130f', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100 },
+  container: { flex: 1, backgroundColor: APP_COLORS.background, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100 },
   scrollView: { flex: 1 },
   slide: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 30, gap: 16 },
   icon: { fontSize: 80, marginBottom: 20 },
-  title: { color: '#F7CE63', fontSize: 32, fontWeight: '900', textAlign: 'center' },
-  subtitle: { color: '#C5D0C9', fontSize: 18, fontWeight: '700', textAlign: 'center' },
-  description: { color: '#9EAFA5', fontSize: 15, textAlign: 'center', lineHeight: 24, marginTop: 10, maxWidth: 320 },
+  title: { color: APP_COLORS.goldBright, fontSize: 32, fontWeight: '900', textAlign: 'center', letterSpacing: 0.5 },
+  subtitle: { color: APP_COLORS.blueElectric, fontSize: 18, fontWeight: '700', textAlign: 'center' },
+  description: { color: APP_COLORS.textSecondary, fontSize: 15, textAlign: 'center', lineHeight: 24, marginTop: 10, maxWidth: 320 },
   footer: { padding: 40, alignItems: 'center', gap: 30 },
   pagination: { flexDirection: 'row', gap: 10 },
   dot: { width: 10, height: 10, borderRadius: 5 },
-  dotActive: { backgroundColor: '#D6A943', width: 24 },
-  dotInactive: { backgroundColor: '#22362C' },
-  button: { width: '100%', maxWidth: 300, backgroundColor: '#D6A943', padding: 18, borderRadius: 16, alignItems: 'center' },
-  buttonText: { color: '#162019', fontSize: 16, fontWeight: '900' }
+  dotActive: { backgroundColor: APP_COLORS.goldPrimary, width: 24 },
+  dotInactive: { backgroundColor: APP_COLORS.surfaceStrong },
+  button: { width: '100%', maxWidth: 300, backgroundColor: APP_COLORS.goldPrimary, padding: 18, borderRadius: 16, alignItems: 'center', boxShadow: '0 4px 14px rgba(229, 184, 105, 0.35)' },
+  buttonText: { color: '#070B0E', fontSize: 16, fontWeight: '900' }
 });

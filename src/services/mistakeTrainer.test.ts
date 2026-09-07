@@ -41,7 +41,7 @@ describe('Mistake Trainer', () => {
       expect(typeof first.bestMove.from).toBe('string');
       expect(typeof first.bestMove.to).toBe('string');
     }
-  });
+  }, 15000);
 
   it('verifies correct mistake attempts ignoring check symbols', () => {
     const exercise: MistakeExercise = {

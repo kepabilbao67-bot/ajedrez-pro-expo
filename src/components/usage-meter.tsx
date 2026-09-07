@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { APP_COLORS } from '@/theme/colors';
+import { DimensionValue, StyleSheet, Text, View } from 'react-native';
 
 export interface UsageMeterProps {
   readonly used: number;
@@ -7,101 +8,144 @@ export interface UsageMeterProps {
   readonly isPro: boolean;
 }
 
+/**
+ * Medidor de uso diario para funcionalidades Free/Pro
+ */
 export function UsageMeter({ used, max, label, isPro }: UsageMeterProps) {
-  if (isPro) {
-    return (
-      <View
-        accessibilityLabel={`${label}: ilimitado`}
-        accessibilityRole="text"
-        style={styles.container}
-      >
-        <View style={styles.header}>
-          <Text style={styles.label}>{label}</Text>
-          <Text style={styles.proValue}>Ilimitado ✨</Text>
-        </View>
-      </View>
-    );
-  }
+  const isFree = !isPro;
+  const isAtLimit = isFree && used >= max;
+  const percentage = Math.min(used / max, 1);
 
-  const percentage = max > 0 ? Math.min((used / max) * 100, 100) : 0;
-  const isComplete = used >= max;
-  const remaining = Math.max(max - used, 0);
+  // Texto para mostrar
+  const displayText = isPro
+    ? 'Ilimitado ✨'
+    : `${used}/${max} usadas`;
+
+  // Color del progreso
+  const progressColor = isAtLimit
+    ? APP_COLORS.danger
+    : APP_COLORS.blueElectric;
+
+  // Ancho de la barra de progreso
+  const progressWidth: DimensionValue = `${percentage * 100}%`;
 
   return (
-    <View
-      accessibilityLabel={`${label}: ${used} de ${max} usadas`}
-      accessibilityRole="text"
-      style={styles.container}
-    >
+    <View style={styles.container}>
+      {/* Cabecera con label y contador */}
       <View style={styles.header}>
         <Text style={styles.label}>{label}</Text>
-        <Text style={[styles.freeValue, isComplete && styles.completeValue]}>
-          {used}/{max} {remaining === 0 ? 'usadas' : remaining === 1 ? '(1 restante)' : `(${remaining} restantes)`}
+        <Text
+          style={[
+            styles.counter,
+            isPro ? styles.counterPro : styles.counterFree,
+            isAtLimit && styles.counterLimit,
+          ]}
+          accessible
+          accessibilityLabel={`${label}: ${displayText}`}
+        >
+          {displayText}
         </Text>
       </View>
-      <View
-        accessibilityLabel={`Progreso: ${Math.round(percentage)}%`}
-        style={[styles.progressTrack, isComplete && styles.completeTrack]}
-      >
+
+      {/* Barra de progreso (solo para Free) */}
+      {isFree && (
         <View
-          style={[
-            styles.progressFill,
-            { width: `${percentage}%` },
-            isComplete && styles.completeFill,
-          ]}
-        />
-      </View>
+          style={styles.progressContainer}
+          accessible
+          accessibilityLabel={`Progreso: ${Math.round(percentage * 100)}% utilizado`}
+        >
+          <View style={styles.progressBackground}>
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: progressWidth,
+                  backgroundColor: progressColor,
+                },
+              ]}
+            />
+          </View>
+
+          {/* Indicador de límite alcanzado */}
+          {isAtLimit && (
+            <Text style={styles.limitText}>Límite diario alcanzado</Text>
+          )}
+        </View>
+      )}
+
+      {/* Mensaje especial para Pro */}
+      {isPro && (
+        <Text style={styles.unlimitedNote}>
+          Desbloquea todas las funcionalidades Premium
+        </Text>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    gap: 6,
+    backgroundColor: APP_COLORS.backgroundSecondary,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
+    alignItems: 'center',
+    marginBottom: 12,
   },
   label: {
-    color: '#D6E0DA',
-    fontSize: 12,
-    fontWeight: '800',
+    fontSize: 16,
+    fontWeight: '600',
+    color: APP_COLORS.textPrimary,
+    flex: 1,
   },
-  freeValue: {
-    color: '#9EAFA5',
-    fontSize: 11,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
+  counter: {
+    fontSize: 15,
+    fontWeight: '600',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
-  completeValue: {
-    color: '#FFD8CF',
+  counterFree: {
+    backgroundColor: APP_COLORS.backgroundAlt,
+    color: APP_COLORS.textSecondary,
   },
-  proValue: {
-    color: '#F7CE63',
-    fontSize: 11,
-    fontWeight: '800',
+  counterPro: {
+    backgroundColor: APP_COLORS.goldGlow,
+    color: APP_COLORS.goldPrimary,
   },
-  progressTrack: {
-    height: 6,
+  counterLimit: {
+    backgroundColor: APP_COLORS.dangerGlow,
+    color: APP_COLORS.danger,
+  },
+  progressContainer: {
+    marginTop: 4,
+  },
+  progressBackground: {
+    height: 8,
+    backgroundColor: APP_COLORS.backgroundAlt,
+    borderRadius: 4,
     overflow: 'hidden',
-    borderRadius: 999,
-    backgroundColor: '#0C1B13',
-    borderWidth: 1,
-    borderColor: '#294235',
-  },
-  completeTrack: {
-    borderColor: '#A84737',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 999,
-    backgroundColor: '#D6A943',
+    borderRadius: 4,
   },
-  completeFill: {
-    backgroundColor: '#C44732',
+  limitText: {
+    fontSize: 12,
+    color: APP_COLORS.danger,
+    marginTop: 6,
+    fontWeight: '500',
+  },
+  unlimitedNote: {
+    fontSize: 13,
+    color: APP_COLORS.goldPrimary,
+    marginTop: 8,
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
 });

@@ -9,7 +9,6 @@ import { ChessBoard } from '@/components/chess-board';
 import { CoachPanel } from '@/components/coach-panel';
 import { GameOverModal, type GameOverCareerContext } from '@/components/game-over-modal';
 import { HistoryPanel } from '@/components/history-panel';
-import { OnboardingScreen } from '@/components/onboarding-screen';
 import { PostGamePanel } from '@/components/post-game-panel';
 import { EvalBar } from '@/components/eval-bar';
 import { VariantsModal } from '@/components/variants-modal';
@@ -204,7 +203,6 @@ export default function Index() {
 
   const [settingsExpanded, setSettingsExpanded] = useState(false);
   const [section, setSection] = useState<AppSection>('home');
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean>(true);
   const [manualGameEndReason, setManualGameEndReason] = useState<GameEndReason | null>(null);
 
   // Time control & Game Clock
@@ -263,13 +261,7 @@ export default function Index() {
   const { playMove, playCapture, playCheck, playVictory } = useAudioSfx(visualPreferences.soundsEnabled);
   const { stats: chessStats, updatePuzzleRushScore, recordGame: recordGameStat } = useChessStats();
 
-  useEffect(() => {
-    import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
-      AsyncStorage.getItem('@ajedrezpro_onboarding').then((val) => {
-        if (val !== 'true') setHasSeenOnboarding(false);
-      }).catch(() => {});
-    }).catch(() => {});
-  }, []);
+  // Portada nueva: siempre activa al abrir la app
 
   // Live evaluation update
   useEffect(() => {
@@ -284,13 +276,6 @@ export default function Index() {
       isMounted = false;
     };
   }, [position, game]);
-
-  const completeOnboarding = () => {
-    setHasSeenOnboarding(true);
-    import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
-      AsyncStorage.setItem('@ajedrezpro_onboarding', 'true').catch(() => {});
-    }).catch(() => {});
-  };
 
   const rush = usePuzzleRush({
     onGameOver: (finalScore) => {
@@ -506,6 +491,22 @@ export default function Index() {
       router.push('/career' as never);
       return;
     }
+    if (action === 'school') {
+      router.push('/school' as never);
+      return;
+    }
+    if (action === 'store') {
+      router.push('/store' as never);
+      return;
+    }
+    if (action === 'collection') {
+      router.push('/collection' as never);
+      return;
+    }
+    if (action === 'profile-editor') {
+      router.push('/profile-editor' as never);
+      return;
+    }
     if (action === 'puzzle-rush') {
       router.push('/puzzle-rush' as never);
       return;
@@ -534,14 +535,15 @@ export default function Index() {
       setVariantsModalVisible(true);
       return;
     }
+    if (action === 'play') {
+      selectMode('ai');
+      setSection('play');
+      return;
+    }
     if (action === 'training') startPuzzle(puzzles[0]);
     if (action === 'settings') setSettingsExpanded(true);
     setSection('play');
   };
-
-  if (!hasSeenOnboarding) {
-    return <OnboardingScreen onComplete={completeOnboarding} />;
-  }
 
   // --- HOME / PORTADA CINEMATOGRÁFICA ---
   if (section === 'home') {
@@ -552,6 +554,27 @@ export default function Index() {
         subtitle: 'Compite en torneos, sube tu rating y alcanza el Campeonato del Mundo',
         badge: 'CARRERA',
         action: 'career' as HomeActionType,
+      },
+      {
+        icon: '🎓',
+        title: 'Escuela AjedrezPro',
+        subtitle: '12 lecciones interactivas, táctica guiada y torneos infantiles Kids',
+        badge: 'ESCUELA',
+        action: 'school' as HomeActionType,
+      },
+      {
+        icon: '💎',
+        title: 'Tienda Real',
+        subtitle: 'Desbloquea sets Staunton, tableros y avatares con Coronas ganadas',
+        badge: 'TIENDA',
+        action: 'store' as HomeActionType,
+      },
+      {
+        icon: '👑',
+        title: 'Mi Colección',
+        subtitle: 'Inventario de tableros, sets de piezas y títulos desbloqueados',
+        badge: 'COLECCIÓN',
+        action: 'collection' as HomeActionType,
       },
       {
         icon: '⚔️',
@@ -772,7 +795,8 @@ export default function Index() {
         <Pressable
           accessibilityRole="button"
           onPress={() => setSection('home')}
-          style={styles.backHomeBtn}
+          hitSlop={8}
+          style={({ pressed }) => [styles.backHomeBtn, pressed && styles.pressed]}
         >
           <Text style={styles.backHomeBtnText}>← Menú</Text>
         </Pressable>
@@ -789,7 +813,8 @@ export default function Index() {
             accessibilityRole="button"
             accessibilityLabel="Puzzle Rush"
             onPress={() => router.push('/puzzle-rush' as never)}
-            style={styles.headerToolBtn}
+            hitSlop={6}
+            style={({ pressed }) => [styles.headerToolBtn, pressed && styles.pressed]}
           >
             <Text style={styles.headerToolIcon}>⚡</Text>
           </Pressable>
@@ -797,7 +822,8 @@ export default function Index() {
             accessibilityRole="button"
             accessibilityLabel="Selector de variantes"
             onPress={() => setVariantsModalVisible(true)}
-            style={styles.headerToolBtn}
+            hitSlop={6}
+            style={({ pressed }) => [styles.headerToolBtn, pressed && styles.pressed]}
           >
             <Text style={styles.headerToolIcon}>🎲</Text>
           </Pressable>
@@ -805,7 +831,8 @@ export default function Index() {
             accessibilityRole="button"
             accessibilityLabel="Reloj FIDE"
             onPress={() => router.push('/clock' as never)}
-            style={styles.headerToolBtn}
+            hitSlop={6}
+            style={({ pressed }) => [styles.headerToolBtn, pressed && styles.pressed]}
           >
             <Text style={styles.headerToolIcon}>⏱</Text>
           </Pressable>
@@ -813,7 +840,8 @@ export default function Index() {
             accessibilityRole="button"
             accessibilityLabel="Aperturas"
             onPress={() => router.push('/openings' as never)}
-            style={styles.headerToolBtn}
+            hitSlop={6}
+            style={({ pressed }) => [styles.headerToolBtn, pressed && styles.pressed]}
           >
             <Text style={styles.headerToolIcon}>📖</Text>
           </Pressable>
@@ -821,7 +849,8 @@ export default function Index() {
             accessibilityRole="button"
             accessibilityLabel="Visor PGN"
             onPress={() => router.push('/pgn-viewer' as never)}
-            style={styles.headerToolBtn}
+            hitSlop={6}
+            style={({ pressed }) => [styles.headerToolBtn, pressed && styles.pressed]}
           >
             <Text style={styles.headerToolIcon}>📜</Text>
           </Pressable>
@@ -925,7 +954,7 @@ export default function Index() {
                 <Text style={styles.botAvatar}>{bot.avatar}</Text>
                 <View>
                   <Text style={[styles.botName, activeBot.id === bot.id && styles.botNameActive]}>{bot.name}</Text>
-                  <Text style={[styles.botDesc, activeBot.id === bot.id && styles.botDescActive]}>Nivel {bot.difficulty} ({bot.playStyle})</Text>
+                  <Text style={[styles.botDesc, activeBot.id === bot.id && styles.botDescActive]}>{bot.elo} Elo · {bot.playStyle}</Text>
                 </View>
               </Pressable>
             ))}
@@ -1014,6 +1043,7 @@ export default function Index() {
           disabled={status.gameOver || manualGameEndReason !== null || pendingPromotion !== null || thinking || (mode === 'ai' && position.turn === 'b')}
           lastMove={lastMove?.move ?? null}
           inCheck={status.check}
+          isCheckmate={status.checkmate}
           boardTheme={boardTheme}
           pieceSet={pieceSet}
           onSquarePress={handleSquarePress}
@@ -1249,14 +1279,14 @@ const styles = StyleSheet.create({
   careerHeroCard: {
     width: '100%',
     maxWidth: 440,
-    backgroundColor: '#0D1A29',
+    backgroundColor: APP_COLORS.surfaceStrong,
     borderRadius: 18,
     borderCurve: 'continuous',
     padding: 14,
     borderWidth: 1.5,
-    borderColor: '#00E5FF88',
+    borderColor: APP_COLORS.borderBlue,
     gap: 10,
-    boxShadow: '0 8px 24px rgba(0, 229, 255, 0.15)',
+    boxShadow: '0 8px 24px rgba(0, 210, 255, 0.15)',
   },
   careerHeroTopRow: {
     flexDirection: 'row',
@@ -1264,21 +1294,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   careerHeroBadge: {
-    backgroundColor: 'rgba(0, 229, 255, 0.18)',
+    backgroundColor: 'rgba(0, 210, 255, 0.18)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#00E5FF',
+    borderColor: APP_COLORS.blueElectric,
   },
   careerHeroBadgeText: {
-    color: '#00E5FF',
+    color: APP_COLORS.blueElectric,
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 0.8,
   },
   careerHeroRank: {
-    color: '#F5C518',
+    color: APP_COLORS.goldBright,
     fontSize: 12,
     fontWeight: '800',
   },
@@ -1292,26 +1322,26 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   careerHeroTournament: {
-    color: '#FFFFFF',
+    color: APP_COLORS.text,
     fontSize: 15,
     fontWeight: '900',
   },
   careerHeroRating: {
-    color: '#94AEC5',
+    color: APP_COLORS.textSecondary,
     fontSize: 12,
     fontWeight: '700',
   },
   careerRatingHighlight: {
-    color: '#00E5FF',
+    color: APP_COLORS.blueElectric,
     fontWeight: '900',
   },
   careerHeroNextMatch: {
-    color: '#CBD5E1',
+    color: APP_COLORS.textSecondary,
     fontSize: 11,
     marginTop: 2,
   },
   careerHeroArrow: {
-    color: '#00E5FF',
+    color: APP_COLORS.blueElectric,
     fontSize: 24,
     fontWeight: '900',
     marginLeft: 8,
@@ -1426,12 +1456,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   backHomeBtn: {
+    minHeight: 44,
+    minWidth: 44,
     backgroundColor: APP_COLORS.surfaceStrong,
     borderWidth: 1,
     borderColor: APP_COLORS.border,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 12,
+    borderCurve: 'continuous',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   backHomeBtnText: {
     color: APP_COLORS.blueElectric,
@@ -1458,9 +1493,10 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   headerToolBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    borderCurve: 'continuous',
     backgroundColor: APP_COLORS.surface,
     borderWidth: 1,
     borderColor: APP_COLORS.border,
@@ -1468,7 +1504,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerToolIcon: {
-    fontSize: 15,
+    fontSize: 18,
   },
 
   modeSelector: {

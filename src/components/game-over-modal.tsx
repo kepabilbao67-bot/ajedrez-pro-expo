@@ -394,13 +394,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   careerTournamentTitle: {
-    color: '#00E5FF',
+    color: APP_COLORS.blueElectric,
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
   careerRoundText: {
-    color: '#F5C518',
+    color: APP_COLORS.goldBright,
     fontSize: 11,
     fontWeight: '700',
   },
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   careerStatLabel: {
-    color: '#64748B',
+    color: APP_COLORS.textMuted,
     fontSize: 9,
     fontWeight: '800',
     letterSpacing: 0.5,
@@ -423,32 +423,32 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   deltaPositive: {
-    color: '#10B981',
+    color: APP_COLORS.success,
   },
   deltaNegative: {
-    color: '#EF4444',
+    color: APP_COLORS.danger,
   },
   careerRatingTransition: {
-    color: '#94A3B8',
+    color: APP_COLORS.textSecondary,
     fontSize: 11,
   },
   careerPositionVal: {
-    color: '#FFFFFF',
+    color: APP_COLORS.text,
     fontSize: 18,
     fontWeight: '900',
   },
   careerPositionSub: {
-    color: '#64748B',
+    color: APP_COLORS.textMuted,
     fontSize: 10,
   },
   careerBtn: {
     minHeight: 50,
     borderRadius: 15,
     borderCurve: 'continuous',
-    backgroundColor: '#00E5FF',
+    backgroundColor: APP_COLORS.blueElectric,
     alignItems: 'center',
     justifyContent: 'center',
-    boxShadow: '0 4px 14px rgba(0, 229, 255, 0.35)',
+    boxShadow: '0 4px 14px rgba(0, 210, 255, 0.35)',
   },
   careerBtnText: {
     color: '#070B0E',

@@ -46,3 +46,7 @@ example
 *.zip
 *.diff
 index_diff.txt
+builds/
+*.apk
+.token-optimizer/
+

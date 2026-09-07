@@ -93,3 +93,33 @@ Completa ejercicios de táctica adaptativa, descubre patrones de mate esenciales
 
 * **¿La aplicación contiene anuncios?**
   Seleccionar: **NO, mi aplicación no contiene anuncios.**
+
+---
+
+## 6. ACCESO A LA APLICACIÓN (APP ACCESS)
+
+* **¿Hay partes de la app con acceso restringido (login, suscripciones, credenciales)?**
+  Seleccionar: **Todas las funciones están disponibles sin restricciones de acceso.**
+  *Justificación:* AjedrezPro no tiene muro de pago, ni pantalla de inicio de sesión ni requiere credenciales especiales para los revisores de Google Play.
+
+---
+
+## 7. PÚBLICO OBJETIVO Y FAMILIA (TARGET AUDIENCE)
+
+* **Grupos de edad objetivo:** 13 a 15 años, 16 a 17 años, 18 años o más.
+* **¿La app puede resultar involuntariamente atractiva para niños menores de 13 años?** No. Se enfoca como herramienta de estrategia y entrenamiento de ajedrez formal para jóvenes y adultos.
+* **Cumplimiento de la política de Familias de Google Play:** Conforme con todas las directrices para apps accesibles a mayores de 13 años.
+
+---
+
+## 8. NOTAS DE VERSIÓN (RELEASE NOTES V1.0.0)
+
+```text
+¡Bienvenido a la versión 1.0.0 de AjedrezPro!
+• Experiencia completa de ajedrez 100% offline y sin anuncios.
+• 8 niveles de IA adaptativa y 5 estilos de juego táctico.
+• Modo Supervivencia (Puzzle Rush) con récords y cronómetro.
+• Academia táctica con cientos de problemas de mate y aperturas ECO.
+• Reloj de ajedrez FIDE integrado para partidas presenciales.
+• Profesor táctico con explicaciones en español en tiempo real.
+```

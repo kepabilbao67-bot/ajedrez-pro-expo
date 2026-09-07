@@ -16,29 +16,29 @@ export function renderRealistic3DPiece(piece: Piece, size: number): React.ReactE
   const type = typeOf(piece);
 
   const prefix = isWhite ? 'r3d-w-' : 'r3d-b-';
-  const strokeColor = isWhite ? '#1E293B' : '#38BDF8';
+  const strokeColor = isWhite ? '#261D0D' : '#38BDF8';
   const strokeW = isWhite ? '2.0' : '2.4';
 
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <Defs>
-        {/* Gradients for White Pieces (Sculpted Warm Ivory & Crisp Porcelain) */}
+        {/* Gradients for White Pieces (Sculpted Metallic Gold & Specular Highlight) */}
         <RadialGradient id="r3d-w-sphere" cx="38%" cy="32%" r="62%">
-          <Stop offset="0%" stopColor="#FFFFFF" />
-          <Stop offset="35%" stopColor="#F8FAFC" />
-          <Stop offset="70%" stopColor="#EDE8DB" />
-          <Stop offset="100%" stopColor="#CBD5E1" />
+          <Stop offset="0%" stopColor="#FFFDF5" />
+          <Stop offset="35%" stopColor="#FFE7AB" />
+          <Stop offset="70%" stopColor="#E5B869" />
+          <Stop offset="100%" stopColor="#BA8A2D" />
         </RadialGradient>
         <LinearGradient id="r3d-w-body" x1="0" y1="0" x2="1" y2="0">
-          <Stop offset="0%" stopColor="#F8FAFC" />
-          <Stop offset="40%" stopColor="#FFFFFF" />
-          <Stop offset="75%" stopColor="#E2E8F0" />
-          <Stop offset="100%" stopColor="#94A3B8" />
+          <Stop offset="0%" stopColor="#FFE7AB" />
+          <Stop offset="40%" stopColor="#FFFDF5" />
+          <Stop offset="75%" stopColor="#E5B869" />
+          <Stop offset="100%" stopColor="#A47723" />
         </LinearGradient>
         <LinearGradient id="r3d-w-bevel" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0%" stopColor="#FFFFFF" />
-          <Stop offset="60%" stopColor="#E2E8F0" />
-          <Stop offset="100%" stopColor="#64748B" />
+          <Stop offset="0%" stopColor="#FFFDF5" />
+          <Stop offset="60%" stopColor="#E5B869" />
+          <Stop offset="100%" stopColor="#78530E" />
         </LinearGradient>
 
         {/* Gradients for Black Pieces (Deep Obsidian Glass with Luminous Edge) */}

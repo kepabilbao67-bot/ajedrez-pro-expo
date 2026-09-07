@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { APP_COLORS } from '@/theme/colors';
 
 export interface PuzzleRushPanelProps {
   readonly isActive: boolean;
@@ -26,10 +27,10 @@ export function PuzzleRushPanel({ isActive, timeLeft, score, strikes, maxStrikes
         <Text style={styles.startTitle}>Supervivencia de Puzzles</Text>
         <Text style={styles.startDesc}>Resuelve todos los problemas que puedas en 3 minutos. 3 fallos y estás fuera.</Text>
         {highScore > 0 ? (
-          <Text style={styles.highScoreText}>Récord actual: {highScore}</Text>
+          <Text style={styles.highScoreText}>Récord actual: {highScore} pts</Text>
         ) : null}
-        <Pressable style={styles.startButton} onPress={onStart}>
-          <Text style={styles.startButtonText}>Empezar Reto</Text>
+        <Pressable style={({ pressed }) => [styles.startButton, pressed && styles.pressed]} onPress={onStart}>
+          <Text style={styles.startButtonText}>Empezar Reto ⚡</Text>
         </Pressable>
       </View>
     );
@@ -65,23 +66,54 @@ export function PuzzleRushPanel({ isActive, timeLeft, score, strikes, maxStrikes
 }
 
 const styles = StyleSheet.create({
-  startCard: { width: '100%', maxWidth: 440, padding: 20, borderRadius: 16, borderCurve: 'continuous', backgroundColor: '#321B17', borderWidth: 1, borderColor: '#A84737', alignItems: 'center', gap: 10 },
-  startTitle: { color: '#FFD8CF', fontSize: 18, fontWeight: '900' },
-  startDesc: { color: '#C5D0C9', fontSize: 13, textAlign: 'center', marginBottom: 8 },
-  highScoreText: { color: '#F7CE63', fontSize: 14, fontWeight: '800', marginBottom: 12 },
-  startButton: { backgroundColor: '#C44732', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 12 },
-  startButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '800' },
+  startCard: {
+    width: '100%',
+    maxWidth: 440,
+    padding: 20,
+    borderRadius: 20,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderGold,
+    alignItems: 'center',
+    gap: 10,
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(229, 184, 105, 0.2)',
+  },
+  startTitle: { color: APP_COLORS.goldBright, fontSize: 18, fontWeight: '900', letterSpacing: 0.5 },
+  startDesc: { color: APP_COLORS.textSecondary, fontSize: 13, textAlign: 'center', marginBottom: 8 },
+  highScoreText: { color: APP_COLORS.blueElectric, fontSize: 14, fontWeight: '800', marginBottom: 12 },
+  startButton: {
+    backgroundColor: APP_COLORS.goldPrimary,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    borderRadius: 14,
+    borderCurve: 'continuous',
+    boxShadow: '0 4px 14px rgba(229, 184, 105, 0.35)',
+  },
+  startButtonText: { color: '#070B0E', fontSize: 15, fontWeight: '900' },
   
-  activeCard: { width: '100%', maxWidth: 440, padding: 16, borderRadius: 16, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235', gap: 12 },
+  activeCard: {
+    width: '100%',
+    maxWidth: 440,
+    padding: 18,
+    borderRadius: 20,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 1.5,
+    borderColor: APP_COLORS.borderBlue,
+    gap: 12,
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(0, 210, 255, 0.2)',
+  },
   statsRow: { flexDirection: 'row', justifyContent: 'space-between' },
   statItem: { alignItems: 'center', gap: 4 },
-  statLabel: { color: '#9EAFA5', fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
-  statValue: { color: '#F8F4EA', fontSize: 24, fontWeight: '900', fontVariant: ['tabular-nums'] },
-  lowTime: { color: '#C44732' },
+  statLabel: { color: APP_COLORS.textMuted, fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
+  statValue: { color: APP_COLORS.goldBright, fontSize: 24, fontWeight: '900', fontVariant: ['tabular-nums'] },
+  lowTime: { color: APP_COLORS.danger },
   strikes: { fontSize: 18, letterSpacing: 2 },
   strikeActive: { opacity: 1 },
-  strikeLost: { opacity: 0.5 },
+  strikeLost: { opacity: 0.4 },
   
   quitButton: { alignSelf: 'center', marginTop: 4 },
-  quitButtonText: { color: '#9EAFA5', fontSize: 12, fontWeight: '700', textDecorationLine: 'underline' },
+  quitButtonText: { color: APP_COLORS.textMuted, fontSize: 12, fontWeight: '700', textDecorationLine: 'underline' },
+  pressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
 });

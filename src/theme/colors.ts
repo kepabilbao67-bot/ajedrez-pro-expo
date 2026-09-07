@@ -55,6 +55,16 @@ export const APP_COLORS = {
   textGold: '#E5B869',
   textBlue: '#00D2FF',
 
+  // Explicit Design System Tokens
+  backgroundPrimary: '#070B0E',
+  backgroundSecondary: '#0B1117',
+  goldSoft: '#FFE5A3',
+  textPrimary: '#FFFFFF',
+  selection: '#00E5FF',
+  moveHint: '#00D2FF',
+  captureHint: '#FF3B30',
+  checkHint: '#991B1B',
+
   // Legacy compatibility
   accent: '#E5B869',
   muted: '#94A3B8',

@@ -50,6 +50,9 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "vitest run",
+    "verify:chess": "vitest run src/chess/ src/ai/ src/variants/ src/board-themes/piece-sets.test.ts",
+    "verify:play": "node ./scripts/verify-play.mjs",
+    "verify": "vitest run && npx tsc --noEmit && expo lint && git diff --check",
     "build": "expo export"
   },
   "private": true

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 import type { MoveRecord } from '@/chess';
+import { APP_COLORS } from '@/theme/colors';
 
 export interface HistoryPanelProps {
   readonly history: readonly MoveRecord[];
@@ -36,12 +37,21 @@ export function HistoryPanel({ history }: HistoryPanelProps) {
 }
 
 const styles = StyleSheet.create({
-  history: { width: '100%', maxWidth: 440, overflow: 'hidden', borderRadius: 18, borderCurve: 'continuous', backgroundColor: '#14241D', borderWidth: 1, borderColor: '#294235' },
+  history: {
+    width: '100%',
+    maxWidth: 440,
+    overflow: 'hidden',
+    borderRadius: 18,
+    borderCurve: 'continuous',
+    backgroundColor: APP_COLORS.surface,
+    borderWidth: 1,
+    borderColor: APP_COLORS.border,
+  },
   historyHeader: { minHeight: 64, paddingHorizontal: 16, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  historyTitle: { color: '#F6E6BD', fontSize: 14, fontWeight: '800' },
-  historySummary: { color: '#9EAFA5', fontSize: 12, paddingTop: 3 },
-  chevron: { color: '#F5C451', fontSize: 28, fontWeight: '300' },
-  historyBody: { borderTopWidth: 1, borderTopColor: '#294235', padding: 16 },
-  historyText: { color: '#D6E0DA', fontSize: 14, lineHeight: 22, fontVariant: ['tabular-nums'] },
+  historyTitle: { color: APP_COLORS.goldBright, fontSize: 14, fontWeight: '800' },
+  historySummary: { color: APP_COLORS.textSecondary, fontSize: 12, paddingTop: 3 },
+  chevron: { color: APP_COLORS.goldPrimary, fontSize: 28, fontWeight: '300' },
+  historyBody: { borderTopWidth: 1, borderTopColor: APP_COLORS.border, padding: 16 },
+  historyText: { color: APP_COLORS.textSecondary, fontSize: 14, lineHeight: 22, fontVariant: ['tabular-nums'] },
   pressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
 });

@@ -14,6 +14,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(__dirname, '..', 'assets', 'images');
+const PLAYSTORE_DIR = path.join(__dirname, '..', 'docs', 'assets');
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 const EMERALD = { r: 9, g: 19, b: 15 };       // #09130F
@@ -233,6 +234,15 @@ console.log('Generating icon.png (1024x1024 RGB)...');
   const pixels = renderIcon(SIZE, EMERALD, GOLD);
   const png = encodePng(pixels, SIZE, SIZE, false);
   fs.writeFileSync(path.join(OUT_DIR, 'icon.png'), png);
+  console.log(`  Written: ${png.length} bytes`);
+}
+
+// icon_playstore_512.png — full RGB 512×512 for Google Play Store listing
+console.log('Generating icon_playstore_512.png (512x512 RGB)...');
+{
+  const pixels = renderIcon(512, EMERALD, GOLD);
+  const png = encodePng(pixels, 512, 512, false);
+  fs.writeFileSync(path.join(PLAYSTORE_DIR, 'icon_playstore_512.png'), png);
   console.log(`  Written: ${png.length} bytes`);
 }
 

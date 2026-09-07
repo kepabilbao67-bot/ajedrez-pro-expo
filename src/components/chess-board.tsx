@@ -21,6 +21,7 @@ import {
   type Position,
   type Square,
 } from '@/chess';
+import { APP_COLORS } from '@/theme/colors';
 
 const PIECE_NAMES = {
   k: 'rey',
@@ -40,6 +41,7 @@ interface ChessBoardProps {
   readonly disabled?: boolean;
   readonly lastMove: Move | null;
   readonly inCheck: boolean;
+  readonly isCheckmate?: boolean;
   readonly boardTheme: BoardThemeDefinition;
   readonly pieceSet: PieceSetDefinition;
   readonly onSquarePress: (square: Square) => void;
@@ -110,6 +112,7 @@ export function ChessBoard({
   disabled,
   lastMove,
   inCheck,
+  isCheckmate,
   boardTheme,
   pieceSet,
   onSquarePress,
@@ -138,8 +141,8 @@ export function ChessBoard({
         style={[
           styles.frame,
           {
-            backgroundColor: '#070B0E',
-            borderColor: 'rgba(212, 175, 55, 0.45)',
+            backgroundColor: APP_COLORS.background,
+            borderColor: APP_COLORS.borderGold,
             width: size + 4,
             height: size + 4,
           },
@@ -202,9 +205,13 @@ export function ChessBoard({
                   <View style={styles.selectedOverlay} />
                 ) : null}
 
-                {/* King in Check Red Alert Halo */}
+                {/* King in Check or Checkmate Distinct Halo */}
                 {square === checkedKing ? (
-                  <View style={styles.checkedKingOverlay} />
+                  isCheckmate ? (
+                    <View style={styles.checkmateKingOverlay} />
+                  ) : (
+                    <View style={styles.checkedKingOverlay} />
+                  )
                 ) : null}
 
                 {/* Capture Flash animation */}
@@ -307,7 +314,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderCurve: 'continuous',
     borderWidth: 2,
-    backgroundColor: '#0B1117',
+    backgroundColor: APP_COLORS.backgroundAlt,
     boxShadow: '0 12px 32px rgba(0, 0, 0, 0.65), 0 0 14px rgba(212, 175, 55, 0.25)',
   },
   frame: {
@@ -335,7 +342,7 @@ const styles = StyleSheet.create({
     inset: 0,
     zIndex: 1,
     borderWidth: 2.5,
-    borderColor: '#00E5FF',
+    borderColor: APP_COLORS.selection,
     backgroundColor: 'rgba(0, 229, 255, 0.22)',
   },
   lastMoveGlow: {
@@ -343,8 +350,8 @@ const styles = StyleSheet.create({
     inset: 0,
     zIndex: 1,
     borderWidth: 1.5,
-    borderColor: 'rgba(245, 197, 24, 0.55)',
-    backgroundColor: 'rgba(245, 197, 24, 0.22)',
+    borderColor: APP_COLORS.borderGold,
+    backgroundColor: APP_COLORS.goldGlow,
   },
   checkedKingOverlay: {
     position: 'absolute',
@@ -352,8 +359,17 @@ const styles = StyleSheet.create({
     zIndex: 1,
     backgroundColor: 'rgba(239, 68, 68, 0.42)',
     borderWidth: 2.5,
-    borderColor: '#EF4444',
+    borderColor: APP_COLORS.danger,
     boxShadow: 'inset 0 0 14px rgba(239, 68, 68, 0.75)',
+  },
+  checkmateKingOverlay: {
+    position: 'absolute',
+    inset: 0,
+    zIndex: 1,
+    backgroundColor: 'rgba(153, 27, 27, 0.65)',
+    borderWidth: 3.5,
+    borderColor: APP_COLORS.checkHint,
+    boxShadow: 'inset 0 0 18px #991B1B, 0 0 16px rgba(220, 38, 38, 0.85)',
   },
   pressed: {
     opacity: 0.82,
@@ -372,16 +388,16 @@ const styles = StyleSheet.create({
   moveTarget: {
     position: 'absolute',
     zIndex: 3,
-    backgroundColor: '#00E5FF',
+    backgroundColor: APP_COLORS.moveHint,
     borderWidth: 1.5,
     borderColor: 'rgba(7, 11, 14, 0.65)',
-    boxShadow: '0 0 8px rgba(0, 229, 255, 0.75)',
+    boxShadow: '0 0 8px rgba(0, 210, 255, 0.85)',
   },
   captureTarget: {
     position: 'absolute',
     zIndex: 3,
     borderWidth: 3.5,
-    borderColor: '#FF3B30',
+    borderColor: APP_COLORS.captureHint,
     backgroundColor: 'rgba(255, 59, 48, 0.16)',
     boxShadow: '0 0 10px rgba(255, 59, 48, 0.65)',
   },
@@ -389,7 +405,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     inset: 0,
     zIndex: 1,
-    backgroundColor: 'rgba(255, 59, 48, 0.35)',
+    backgroundColor: APP_COLORS.dangerGlow,
   },
   coordinate: {
     position: 'absolute',

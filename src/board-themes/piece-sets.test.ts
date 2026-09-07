@@ -64,4 +64,51 @@ describe('Piece Sets Architecture & Readability', () => {
       expect(React.isValidElement(rendered)).toBe(true);
     }
   });
+
+  describe('Contrast & Visibility on Blue Boards (WCAG standards)', () => {
+    function getLuminance(hex: string): number {
+      const rgb = hex.replace('#', '');
+      const r = parseInt(rgb.substring(0, 2), 16) / 255;
+      const g = parseInt(rgb.substring(2, 4), 16) / 255;
+      const b = parseInt(rgb.substring(4, 6), 16) / 255;
+      const a = [r, g, b].map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+      return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+    }
+
+    function getContrastRatio(hex1: string, hex2: string): number {
+      const lum1 = getLuminance(hex1);
+      const lum2 = getLuminance(hex2);
+      const brightest = Math.max(lum1, lum2);
+      const darkest = Math.min(lum1, lum2);
+      return (brightest + 0.05) / (darkest + 0.05);
+    }
+
+    it('black Staunton outline has high contrast (> 10:1) on dark blue classic square #1B2A38', () => {
+      const outlineColor = '#F8FAFC';
+      const darkBlueSquare = '#1B2A38';
+      const ratio = getContrastRatio(outlineColor, darkBlueSquare);
+      expect(ratio).toBeGreaterThan(10);
+    });
+
+    it('black Staunton outline has high contrast (> 5.5:1) on dark FIDE blue square #335E8A', () => {
+      const outlineColor = '#F8FAFC';
+      const darkFideSquare = '#335E8A';
+      const ratio = getContrastRatio(outlineColor, darkFideSquare);
+      expect(ratio).toBeGreaterThan(5.5);
+    });
+
+    it('black Staunton piece body has strong contrast (> 5.5:1) on light blue classic square #96B0C6', () => {
+      const pieceBody = '#1E293B';
+      const lightBlueSquare = '#96B0C6';
+      const ratio = getContrastRatio(pieceBody, lightBlueSquare);
+      expect(ratio).toBeGreaterThan(5.5);
+    });
+
+    it('black Staunton piece body has exceptional contrast (> 10:1) on light FIDE blue square #DEEBF5', () => {
+      const pieceBody = '#1E293B';
+      const lightFideSquare = '#DEEBF5';
+      const ratio = getContrastRatio(pieceBody, lightFideSquare);
+      expect(ratio).toBeGreaterThan(10);
+    });
+  });
 });

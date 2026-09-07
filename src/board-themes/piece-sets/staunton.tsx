@@ -7,44 +7,44 @@ export function renderStauntonPiece(piece: Piece, size: number): React.ReactElem
   const type = typeOf(piece);
 
   const fillMain = isWhite ? 'url(#staunton-white-grad)' : 'url(#staunton-black-grad)';
-  const strokeColor = isWhite ? '#1E293B' : '#38BDF8';
-  const innerStroke = isWhite ? '#CBD5E1' : '#0F172A';
-  const accentColor = isWhite ? '#FFF8E7' : '#38BDF8';
-  const innerShadow = isWhite ? '#E2E8F0' : '#090D12';
-  const rimLight = isWhite ? '#FFFFFF' : '#7DD3FC';
-  const strokeW = isWhite ? '2.5' : '2.6';
+  const strokeColor = isWhite ? '#261D0D' : '#F8FAFC';
+  const innerStroke = isWhite ? '#FFE5A3' : '#64748B';
+  const accentColor = isWhite ? '#FFF5D0' : '#F1F5F9';
+  const innerShadow = isWhite ? '#C49A3D' : '#1E293B';
+  const rimLight = isWhite ? '#FFFDF5' : '#FFFFFF';
+  const strokeW = isWhite ? '2.5' : '3.2';
 
   return (
     <Svg width={size} height={size} viewBox="0 0 100 100">
       <Defs>
-        {/* White Pieces: Refined Warm Ivory & Crisp White for Instant Recognition */}
+        {/* White Pieces: Luxurious Polished Metallic Gold with Rich Specular Highlight */}
         <LinearGradient id="staunton-white-grad" x1="0" y1="0" x2="0.3" y2="1">
-          <Stop offset="0%" stopColor="#FFFFFF" />
-          <Stop offset="30%" stopColor="#F8FAFC" />
-          <Stop offset="70%" stopColor="#EDE8DC" />
-          <Stop offset="100%" stopColor="#DDD6C6" />
+          <Stop offset="0%" stopColor="#FFFDF5" />
+          <Stop offset="25%" stopColor="#FFE7AB" />
+          <Stop offset="65%" stopColor="#E5B869" />
+          <Stop offset="100%" stopColor="#C99738" />
         </LinearGradient>
 
-        {/* Black Pieces: Deep Charcoal Obsidian with Titanium Sheen */}
-        <LinearGradient id="staunton-black-grad" x1="0" y1="0" x2="0.3" y2="1">
-          <Stop offset="0%" stopColor="#334155" />
-          <Stop offset="30%" stopColor="#1E293B" />
-          <Stop offset="70%" stopColor="#0F172A" />
-          <Stop offset="100%" stopColor="#070C12" />
+        {/* Black Pieces: Sculpted Obsidian Charcoal with Metallic Titanium Specular Volumetrics */}
+        <LinearGradient id="staunton-black-grad" x1="0" y1="0" x2="0.35" y2="1">
+          <Stop offset="0%" stopColor="#475569" />
+          <Stop offset="25%" stopColor="#334155" />
+          <Stop offset="65%" stopColor="#1E293B" />
+          <Stop offset="100%" stopColor="#0F172A" />
         </LinearGradient>
 
         <RadialGradient id="staunton-white-radial" cx="35%" cy="30%" r="65%">
-          <Stop offset="0%" stopColor="#FFFFFF" />
-          <Stop offset="45%" stopColor="#F8FAFC" />
-          <Stop offset="80%" stopColor="#E5DFD0" />
-          <Stop offset="100%" stopColor="#C8BEA8" />
+          <Stop offset="0%" stopColor="#FFFDF5" />
+          <Stop offset="35%" stopColor="#FFE7AB" />
+          <Stop offset="75%" stopColor="#E5B869" />
+          <Stop offset="100%" stopColor="#BA8A2D" />
         </RadialGradient>
 
         <RadialGradient id="staunton-black-radial" cx="35%" cy="30%" r="65%">
           <Stop offset="0%" stopColor="#64748B" />
-          <Stop offset="35%" stopColor="#334155" />
-          <Stop offset="75%" stopColor="#0F172A" />
-          <Stop offset="100%" stopColor="#06090E" />
+          <Stop offset="35%" stopColor="#475569" />
+          <Stop offset="75%" stopColor="#1E293B" />
+          <Stop offset="100%" stopColor="#0F172A" />
         </RadialGradient>
       </Defs>
 
@@ -53,7 +53,7 @@ export function renderStauntonPiece(piece: Piece, size: number): React.ReactElem
         <Path
           d="M 16 91 Q 50 95 84 91 Q 50 88 16 91 Z"
           fill="#000000"
-          opacity={isWhite ? 0.45 : 0.65}
+          opacity={isWhite ? 0.45 : 0.35}
         />
 
         {/* Base pedestal for all pieces */}
@@ -76,9 +76,9 @@ export function renderStauntonPiece(piece: Piece, size: number): React.ReactElem
         <Path
           d="M 22 83 Q 50 80 78 83"
           stroke={rimLight}
-          strokeWidth="1.6"
+          strokeWidth="1.8"
           fill="none"
-          opacity={isWhite ? 0.9 : 0.85}
+          opacity={isWhite ? 0.9 : 0.95}
         />
 
         {/* --- PIECE SPECIFIC GEOMETRY --- */}
@@ -151,8 +151,8 @@ export function renderStauntonPiece(piece: Piece, size: number): React.ReactElem
               opacity={isWhite ? 0.35 : 0.8}
             />
             {/* High-contrast Eye */}
-            <Circle cx="35" cy="28" r="3.4" fill={isWhite ? '#0F172A' : '#38BDF8'} stroke={isWhite ? '#64748B' : '#070C12'} strokeWidth="1" />
-            <Circle cx="34.5" cy="27.5" r="1.3" fill="#FFFFFF" opacity={0.95} />
+            <Circle cx="35" cy="28" r="3.4" fill={isWhite ? '#0F172A' : '#F8FAFC'} stroke={isWhite ? '#64748B' : '#0F172A'} strokeWidth="1" />
+            <Circle cx="34.5" cy="27.5" r="1.3" fill={isWhite ? '#FFFFFF' : '#0F172A'} opacity={0.95} />
             {/* Nostril / Snout accent */}
             <Path d="M 21 44 L 27 46" stroke={isWhite ? strokeColor : rimLight} strokeWidth="2.2" strokeLinecap="round" />
             {/* Flowing Mane highlight */}
@@ -176,7 +176,7 @@ export function renderStauntonPiece(piece: Piece, size: number): React.ReactElem
             {/* Wide, Prominent Mitre Cut Notch (High Visibility) */}
             <Path
               d="M 43 23 L 57 37"
-              stroke={isWhite ? '#0F172A' : '#38BDF8'}
+              stroke={isWhite ? '#0F172A' : '#F8FAFC'}
               strokeWidth="3.6"
               strokeLinecap="round"
             />
