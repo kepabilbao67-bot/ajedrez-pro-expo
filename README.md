@@ -70,3 +70,7 @@ src/
   board-themes/   temas y piezas
 scripts/          utilidades (generación de efectos de sonido, reset del proyecto)
 ```
+
+## Licencia
+
+MIT © 2026 Kepa Bilbao. Ver [`LICENSE`](LICENSE).
